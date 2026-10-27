@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Heart } from "lucide-react";
 import type { NftSummary } from "../types";
 
 interface NftCardProps {
@@ -35,9 +36,14 @@ export function NftCard({ nft }: NftCardProps) {
 
         <h3 className="mt-3 truncate font-medium text-foreground">{nft.name}</h3>
         <p className="truncate text-sm text-muted-foreground">{nft.collection}</p>
-        <p className="mt-1 text-sm font-medium text-primary">
-          {nft.priceEth} ETH
-        </p>
+        <div className="mt-1 flex items-center justify-between">
+          <p className="text-sm font-medium text-primary">{nft.priceEth} ETH</p>
+          {/* Fora do Figma: evidência visual do tempo real (Socket.IO) atualizando o card sozinho. */}
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Heart className="size-3" />
+            {nft.likes}
+          </span>
+        </div>
       </Link>
     </li>
   );

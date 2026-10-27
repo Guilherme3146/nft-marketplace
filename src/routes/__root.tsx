@@ -4,6 +4,7 @@ import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router
 import { LogIn, LogOut, Search, ShoppingCart } from 'lucide-react'
 import { useCart } from '@/features/cart/queries'
 import { useLogout, useSession } from '@/features/auth/queries'
+import { useRealtimeNftUpdates } from '@/features/nfts/realtime'
 
 export interface RouterContext {
   queryClient: QueryClient
@@ -15,6 +16,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 })
 
 function RootLayout() {
+  useRealtimeNftUpdates()
+
   const cart = useCart()
   const cartCount = cart.data?.items.reduce((sum, item) => sum + item.qty, 0) ?? 0
 

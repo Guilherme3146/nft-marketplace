@@ -86,7 +86,11 @@ function NftDetailPage() {
 
           <div className="flex flex-1 flex-col gap-4">
             <h1 className="text-[28px] font-bold text-foreground">{nft.name}</h1>
-            <p className="text-xl font-bold text-accent">{nft.priceEth} ETH</p>
+            <div className="flex items-center gap-3">
+              <p className="text-xl font-bold text-accent">{nft.priceEth} ETH</p>
+              {/* Fora do Figma: evidência visual do tempo real (Socket.IO) atualizando sozinho. */}
+              <span className="text-sm text-muted-foreground">{nft.likes} curtidas</span>
+            </div>
 
             <hr className="border-border" />
 

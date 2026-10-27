@@ -58,7 +58,7 @@ Valores em ETH trafegam como **string decimal** (`"0.25"`) e os cálculos usam `
 - **Atualização otimista** (requisito do desafio): `useToggleFavorite` (`src/features/favorites/queries.ts`) e `useUpdateCartItemQty` (`src/features/cart/queries.ts`) mudam o cache antes da resposta chegar (`onMutate`), guardam o estado anterior, desfazem em `onError` se a chamada falhar, e sempre revalidam em `onSettled`.
 - **Troca de identidade** (login/logout/cadastro): `useLogin`, `useRegister` e `useLogout` (`src/features/auth/queries.ts`) chamam `queryClient.invalidateQueries()` **sem query key** — ou seja, invalidam o cache inteiro. Motivo: quando quem está logado muda, qualquer coisa que o cache guardava (favoritos, carrinho) pode pertencer à pessoa errada; jogar tudo fora é mais simples e mais seguro do que tentar invalidar seletivamente.
 - **Sem otimismo + idempotência** (requisito do desafio): `useCreateOrder` (`src/features/orders/queries.ts`) é uma mutation comum, sem `onMutate` — a tela só avança pra confirmação depois que o servidor responde de verdade que o pedido existe (dinheiro/propriedade não se "chuta antes"). A chave de idempotência (`crypto.randomUUID()`, gerada uma vez quando a tela de pagamento monta) vira o próprio `id` do pedido no servidor; um reenvio da mesma tentativa (duplo clique, retry de rede) encontra o pedido já existente em vez de criar outro.
-- ⏳ Invalidação por eventos de tempo real.
+- **Eventos de tempo real** (`useRealtimeNftUpdates`, `src/features/nfts/realtime.ts`): em vez de invalidar e refazer a consulta, o evento é aplicado direto no cache via `queryClient.setQueriesData({ queryKey: nftKeys.all }, ...)` — mais barato que um refetch, e funciona tanto nas listas quanto no detalhe porque os dois ficam sob o mesmo prefixo de chave. Cada item só é sobrescrito se `evento.version > item.version`; eventos atrasados (fora de ordem) são descartados silenciosamente.
 
 ## 4. Sessão
 
@@ -82,7 +82,15 @@ O Figma repete o formulário inteiro de carteira (`Nome de exibição`, `Rede`, 
 
 `/pagamento` também redireciona pra `/carrinho` se o carrinho estiver vazio (checado no `loader`, antes da tela montar). O pedido criado (`POST /orders`) leva para `/confirmacao/$orderId`, que segue o mesmo molde de `nfts.$id.tsx`: `loader` + `ensureQueryData` + `notFound()` se o pedido não existir ou não for do usuário logado.
 
-## 6. Tempo real e reconciliação REST × Socket.IO ⏳
+## 6. Tempo real e reconciliação REST × Socket.IO
+
+A API simulada não tem só REST: `src/mocks/handlers/realtime.ts` registra um canal WebSocket (`ws.link('*/socket.io/*')` do MSW) que, a cada conexão, começa a emitir eventos `nft:update` sozinho a cada ~4s — escolhe um NFT aleatório, soma uma curtida e (30% das vezes) reduz o estoque de uma edição, igual "alguém comprando em outra aba agora mesmo". `@mswjs/socket.io-binding` (`toSocketIo`) é quem traduz isso pro "idioma" do protocolo Socket.IO (framing de pacotes), então o código do handler só lida com `io.client.emit(...)` normal.
+
+No navegador, `src/lib/socket.ts` é o único socket da aplicação (mesma ideia do `api.ts` único pro Axios), forçado a usar WebSocket puro (`transports: ['websocket']`) — é o único transporte que o MSW intercepta nesse projeto; o modo padrão do Socket.IO tentaria primeiro HTTP long-polling. `useRealtimeNftUpdates()` ouve esse socket uma única vez (chamado em `__root.tsx`, vale pro app inteiro) e escreve cada evento direto no cache do TanStack Query (ver seção 3) — nunca dispara um novo `fetch`.
+
+**Reconciliação por versão**: cada `NftSummary`/`Nft` tem um campo `version` que só cresce a cada mudança no servidor. Ao chegar um evento, o cliente só aplica se `evento.version > item.version` — isso evita que um evento atrasado (chegou fora de ordem, problema inerente a qualquer canal assíncrono) sobrescreva um dado mais novo que o cliente já tem. Sem isso, dois eventos chegando fora de ordem fariam a tela "voltar no tempo" aleatoriamente.
+
+**Evidência visual**: o contador de curtidas (❤) nos cards e na tela de Detalhe não existe no Figma — foi adicionado só porque sem ele não haveria nenhuma prova visual de que o tempo real está funcionando (o campo `likes` já existia no modelo de dado, mas nunca tinha sido desenhado em tela antes deste módulo).
 
 ## 7. API simulada (MSW)
 

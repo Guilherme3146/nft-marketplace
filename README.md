@@ -2,7 +2,7 @@
 
 Marketplace de NFTs em React + TypeScript, com API **simulada** (MSW), tempo real simulado (Socket.IO sobre MSW) e testes E2E (Playwright). Desafio de front-end.
 
-> Estado atual: catálogo, Detalhe do NFT, Carrinho, Conta/Sessão, Perfil/Carteiras e Pagamento/Confirmação de pedido (checkout sem otimismo, idempotente, a partir da carteira já cadastrada) prontos. As seções marcadas com ⏳ são preenchidas à medida que cada módulo é entregue.
+> Estado atual: catálogo, Detalhe do NFT, Carrinho, Conta/Sessão, Perfil/Carteiras, Pagamento/Confirmação de pedido e Tempo real (curtidas/estoque atualizando sozinhos via Socket.IO, com reconciliação por versão) prontos. As seções marcadas com ⏳ são preenchidas à medida que cada módulo é entregue.
 
 ## Stack
 
@@ -15,7 +15,7 @@ Marketplace de NFTs em React + TypeScript, com API **simulada** (MSW), tempo rea
 | Cliente HTTP | Axios (único ponto de acesso à API) |
 | Estilização / componentes | Tailwind CSS 4 + shadcn/ui |
 | API simulada | MSW (`msw` 2.x) |
-| Tempo real | Socket.IO (`socket.io-client`) ⏳ |
+| Tempo real | Socket.IO (`socket.io-client`) sobre MSW (`@mswjs/socket.io-binding`) |
 | Testes E2E | Playwright |
 | Lint | oxlint |
 

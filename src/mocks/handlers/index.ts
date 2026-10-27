@@ -5,6 +5,7 @@ import { authHandlers } from './auth'
 import { profileHandlers } from './profile'
 import { walletsHandlers } from './wallets'
 import { ordersHandlers } from './orders'
+import { realtimeHandlers } from './realtime'
 
 export const handlers = [
   ...nftHandlers,
@@ -14,4 +15,5 @@ export const handlers = [
   ...profileHandlers,
   ...walletsHandlers,
   ...ordersHandlers,
+  ...realtimeHandlers,
 ]
