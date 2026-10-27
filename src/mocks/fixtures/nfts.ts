@@ -23,22 +23,15 @@ const EDITION_TEMPLATES = [
   { id: 'genesis', label: 'Genesis', multiplier: '3', total: 5 },
 ]
 
-function artDataUri(seed: number, variant: number): string {
-  const hueA = (seed * 47 + variant * 31) % 360
-  const hueB = (hueA + 70 + ((seed * 13) % 90)) % 360
-  const cx = 200 + ((seed * 53 + variant * 97) % 400)
-  const cy = 200 + ((seed * 29 + variant * 61) % 400)
-  const radius = 120 + ((seed * 17 + variant * 23) % 180)
-  const rotation = (seed * 11 + variant * 25) % 90
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">` +
-    `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">` +
-    `<stop offset="0" stop-color="hsl(${hueA} 70% 55%)"/><stop offset="1" stop-color="hsl(${hueB} 70% 35%)"/>` +
-    `</linearGradient></defs><rect width="800" height="800" fill="url(#g)"/>` +
-    `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="hsl(${hueB} 80% 75%)" fill-opacity=".55"/>` +
-    `<rect x="${800 - cx}" y="${800 - cy}" width="${radius}" height="${radius}" rx="24" fill="hsl(${hueA} 80% 85%)" ` +
-    `fill-opacity=".35" transform="rotate(${rotation} 400 400)"/></svg>`
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+const ARTWORKS = [
+  '/nft-art/emerald-ape.jpg',
+  '/nft-art/violet-nomad.jpg',
+  '/nft-art/ivory-baron.jpg',
+  '/nft-art/golden-beat.jpg',
+]
+
+function pickArtwork(index: number): string {
+  return ARTWORKS[index % ARTWORKS.length]
 }
 
 export const NFT_COUNT = 48
@@ -48,7 +41,8 @@ function buildNft(index: number): Nft {
   const number = index + 1
   const soldOut = number % 9 === 0
   const basePrice = new Decimal((0.05 + random() * 5).toFixed(3))
-  const images = [0, 1, 2].map((variant) => artDataUri(number, variant))
+  const artwork = pickArtwork(index)
+  const images = [artwork]
 
   const editions: NftEdition[] = EDITION_TEMPLATES.slice(0, 1 + (index % 3)).map((template) => {
     const drawn = 1 + Math.floor(random() * template.total)

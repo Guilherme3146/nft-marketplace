@@ -21,7 +21,7 @@ export function CatalogHero() {
       </div>
 
       <img
-        src="/hero/hero-artwork.png"
+        src="/nft-art/emerald-ape.jpg"
         alt="Arte digital em destaque"
         width={450}
         height={450}
