@@ -115,12 +115,8 @@ npm run test:e2e                  # desktop + mobile
 npm run test:e2e:ui               # modo interativo
 ```
 
-46 testes cobrindo catálogo, Detalhe do NFT, carrinho/checkout completo, conta/sessão e cenários de rede simulados, rodando contra o build de produção em dois tamanhos de viewport (1440px e 390px). Detalhes em [ARCHITECTURE.md](./ARCHITECTURE.md#71-testes-e2e-playwright).
+46 testes cobrindo catálogo, Detalhe do NFT, carrinho/checkout completo, conta/sessão e cenários de rede simulados, rodando contra o build de produção em dois tamanhos de viewport (1440px e 390px).
 
 ## Deploy (Vercel)
 
 Importe o repositório na Vercel (preset **Vite**, comando `npm run build`, saída `dist`). O `vercel.json` já reescreve todas as rotas para `index.html` (acesso direto e refresh funcionam) e mantém o service worker do MSW sem cache. A API simulada fica ativa no deploy via `.env.production`.
-
-## Documentação de arquitetura
-
-Veja [ARCHITECTURE.md](./ARCHITECTURE.md): contratos, cache, sessão, carrinho, tempo real, limitações e desvios do Figma.

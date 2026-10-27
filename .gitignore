@@ -33,3 +33,6 @@ lighthouse/tmp
 
 # TanStack Router (cache do gerador)
 .tanstack
+
+# Documentação interna (fica só local)
+ARCHITECTURE.md
