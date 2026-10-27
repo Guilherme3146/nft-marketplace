@@ -45,7 +45,7 @@ function LoginPage() {
             {...register("email")}
             type="email"
             placeholder="contato@email.com"
-            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-secondary"
+            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground"
           />
           {errors.email ? <p className="text-xs text-destructive">{errors.email.message}</p> : null}
         </div>
@@ -55,7 +55,7 @@ function LoginPage() {
             {...register("password")}
             type="password"
             placeholder="***********"
-            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-secondary"
+            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground"
           />
           {errors.password ? (
             <p className="text-xs text-destructive">{errors.password.message}</p>

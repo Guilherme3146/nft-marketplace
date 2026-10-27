@@ -162,4 +162,15 @@ html {
   [role="checkbox"]:not(:disabled) {
     cursor: pointer;
   }
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--foreground);
+    -webkit-box-shadow: 0 0 0px 1000px var(--card) inset;
+    box-shadow: 0 0 0px 1000px var(--card) inset;
+    transition: background-color 600000s 0s, color 600000s 0s;
+  }
 }

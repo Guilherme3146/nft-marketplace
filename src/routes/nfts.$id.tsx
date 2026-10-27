@@ -132,7 +132,7 @@ function NftDetailPage() {
               </button>
             </div>
 
-            <dl className="flex flex-col gap-2 text-[15px] text-secondary">
+            <dl className="flex flex-col gap-2 text-[15px] text-muted-foreground">
               <div>
                 <dt className="inline font-medium">ID do token: </dt>
                 <dd className="inline">#{nft.id}</dd>

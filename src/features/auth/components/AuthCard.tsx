@@ -40,14 +40,14 @@ export function AuthCard({ active, subtitle, children }: AuthCardProps) {
         <button
           type="button"
           disabled
-          className="h-10 cursor-not-allowed rounded-[5px] border border-border text-[13px] font-medium text-secondary opacity-60"
+          className="h-10 cursor-not-allowed rounded-[5px] border border-border text-[13px] font-medium text-muted-foreground opacity-60"
         >
           Continuar com Google
         </button>
         <button
           type="button"
           disabled
-          className="h-10 cursor-not-allowed rounded-[5px] border border-border text-[13px] font-medium text-secondary opacity-60"
+          className="h-10 cursor-not-allowed rounded-[5px] border border-border text-[13px] font-medium text-muted-foreground opacity-60"
         >
           Continuar com Facebook
         </button>

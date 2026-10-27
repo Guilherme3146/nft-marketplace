@@ -25,14 +25,14 @@ export function CartItemRow({ item }: CartItemRowProps) {
         />
         <div className="min-w-0">
           <p className="truncate font-bold text-foreground">{item.nft.name}</p>
-          <p className="truncate text-sm text-secondary">
+          <p className="truncate text-sm text-muted-foreground">
             ID do token: #{item.nftId} · {item.edition.label}
           </p>
         </div>
       </Link>
 
       <div className="flex items-center justify-between gap-3 md:contents">
-        <p className="font-bold text-secondary">{item.edition.priceEth} ETH</p>
+        <p className="font-bold text-muted-foreground">{item.edition.priceEth} ETH</p>
 
         <NftQuantityStepper
           quantity={item.qty}

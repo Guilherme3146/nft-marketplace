@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
 export const accountInputClass =
-  "h-10 w-full rounded-[3px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-secondary";
+  "h-10 w-full rounded-[3px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground";
 
 interface AccountFormFieldProps {
   label: string;

@@ -54,19 +54,19 @@ function ConfirmacaoPage() {
 
       <div className="mt-8 grid grid-cols-2 gap-y-3 divide-border border-y border-border px-4 py-4 text-center text-sm sm:grid-cols-4 sm:gap-y-0 sm:divide-x sm:px-8">
         <div>
-          <p className="text-secondary">ID da transação</p>
+          <p className="text-muted-foreground">ID da transação</p>
           <p className="truncate font-medium text-foreground">{order.id.slice(0, 8)}…</p>
         </div>
         <div>
-          <p className="text-secondary">Data</p>
+          <p className="text-muted-foreground">Data</p>
           <p className="font-medium text-foreground">{formattedDate}</p>
         </div>
         <div>
-          <p className="text-secondary">Total</p>
+          <p className="text-muted-foreground">Total</p>
           <p className="font-medium text-foreground">{order.totalEth} ETH</p>
         </div>
         <div>
-          <p className="text-secondary">Carteira</p>
+          <p className="text-muted-foreground">Carteira</p>
           <p className="font-medium text-foreground">{WALLET_TYPE_LABELS[order.walletType]}</p>
         </div>
       </div>
@@ -85,7 +85,7 @@ function ConfirmacaoPage() {
               />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-bold text-foreground">{item.nft.name}</p>
-                <p className="text-sm text-secondary">
+                <p className="text-sm text-muted-foreground">
                   ID do token: #{item.nftId} (x {item.qty})
                 </p>
               </div>
@@ -120,7 +120,7 @@ function ConfirmacaoPage() {
         <button
           type="button"
           disabled
-          className="h-10 cursor-not-allowed rounded-[5px] border border-border px-4 text-sm font-medium text-secondary opacity-60"
+          className="h-10 cursor-not-allowed rounded-[5px] border border-border px-4 text-sm font-medium text-muted-foreground opacity-60"
         >
           Ver no Etherscan
         </button>

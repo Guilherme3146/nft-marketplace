@@ -52,7 +52,7 @@ function CadastroPage() {
             {...register("name")}
             type="text"
             placeholder="Nome de usuário"
-            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-secondary"
+            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground"
           />
           {errors.name ? <p className="text-xs text-destructive">{errors.name.message}</p> : null}
         </div>
@@ -62,7 +62,7 @@ function CadastroPage() {
             {...register("email")}
             type="email"
             placeholder="Digite seu e-mail"
-            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-secondary"
+            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground"
           />
           {errors.email ? <p className="text-xs text-destructive">{errors.email.message}</p> : null}
         </div>
@@ -72,7 +72,7 @@ function CadastroPage() {
             {...register("password")}
             type="password"
             placeholder="Senha"
-            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-secondary"
+            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground"
           />
           {errors.password ? (
             <p className="text-xs text-destructive">{errors.password.message}</p>
@@ -84,7 +84,7 @@ function CadastroPage() {
             {...register("confirmPassword")}
             type="password"
             placeholder="Confirmar senha"
-            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-secondary"
+            className="h-10 rounded-[5px] border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground"
           />
           {errors.confirmPassword ? (
             <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>

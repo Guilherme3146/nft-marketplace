@@ -119,7 +119,7 @@ function PagamentoPage() {
               {...register("note")}
               id="note"
               rows={5}
-              className="w-full rounded-[3px] border border-border bg-transparent p-3 text-sm text-foreground placeholder:text-secondary"
+              className="w-full rounded-[3px] border border-border bg-transparent p-3 text-sm text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </div>
