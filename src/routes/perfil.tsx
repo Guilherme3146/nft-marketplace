@@ -51,8 +51,6 @@ export const Route = createFileRoute("/perfil")({
 });
 
 function PerfilPage() {
-  // O loader já garantiu que o perfil está no cache — por isso dá pra usar
-  // "profile" direto como valor inicial do formulário, sem useEffect.
   const { data: profile } = useSuspenseQuery(profileQueryOptions());
   const updateProfile = useUpdateProfile();
   const changePassword = useChangePassword();
@@ -126,7 +124,6 @@ function PerfilPage() {
           </AccountFormField>
         </div>
 
-        {/* Upload de avatar de verdade está fora do escopo deste mock — só visual (ver ARCHITECTURE.md). */}
         <div className="flex items-center gap-6">
           <div className="flex size-[50px] items-center justify-center rounded-full border border-border bg-surface-raised">
             <User className="size-6 text-muted-foreground" />

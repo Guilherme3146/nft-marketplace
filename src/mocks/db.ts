@@ -4,11 +4,6 @@ import type { Order } from '@/features/orders/types'
 import { nftFixtures } from './fixtures/nfts'
 import { userFixtures, type UserFixture } from './fixtures/users'
 
-/**
- * "Banco de dados" da API simulada: vive em memória e é espelhado no localStorage
- * para sobreviver a refresh. resetDb() volta SEMPRE para o mesmo estado conhecido.
- * Nos próximos módulos entram aqui: carts, orders, wallets.
- */
 export interface CartRecord {
   nftId: string
   editionId: string
@@ -17,20 +12,16 @@ export interface CartRecord {
 
 export interface MockDb {
   nfts: Nft[]
-  /** Uma lista de favoritos/carrinho por usuário; "guest" é quem não está logado. */
   favoritesByUser: Record<string, string[]>
   cartByUser: Record<string, CartRecord[]>
   users: UserFixture[]
-  /** token → userId. "Sessão" fake: só um mapa em memória, sem JWT de verdade. */
   sessions: Record<string, string>
-  /** Uma carteira principal por usuário (ou nenhuma ainda). */
   walletsByUser: Record<string, Wallet | null>
   ordersByUser: Record<string, Order[]>
 }
 
 export const GUEST_USER_ID = 'guest'
 
-/** Muda sempre que o formato do MockDb muda, pra dado salvo no formato antigo ser ignorado em vez de quebrar o app. */
 const STORAGE_KEY = 'nft-marketplace:mock-db:v4'
 
 const hasStorage = () => typeof localStorage !== 'undefined'
@@ -53,7 +44,6 @@ function load(): MockDb {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) return JSON.parse(raw) as MockDb
     } catch {
-      // Dado corrompido no localStorage: ignora e recomeça do seed.
     }
   }
   return seed()
@@ -70,7 +60,6 @@ export function persistDb(): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   } catch {
-    // Quota cheia ou storage bloqueado: a API simulada continua funcionando em memória.
   }
 }
 

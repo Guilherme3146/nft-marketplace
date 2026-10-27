@@ -19,12 +19,6 @@ interface CatalogToolbarProps {
   onChangeSort: (sort: NftSort) => void;
 }
 
-/**
- * As abas são atalhos sobre o mesmo parâmetro "sort" — não existe um
- * conceito separado de "novo" no nosso modelo de dado, então "Todos os
- * NFTs" e "Novos lançamentos" fazem a mesma coisa (sort: "recent"); só
- * "Em alta" (sort: "popular") tem um efeito realmente diferente.
- */
 export function CatalogToolbar({ sort, onChangeSort }: CatalogToolbarProps) {
   const isPopular = sort === "popular";
 
@@ -54,7 +48,6 @@ export function CatalogToolbar({ sort, onChangeSort }: CatalogToolbarProps) {
         <span>Ordenar por:</span>
         <Select value={sort} onValueChange={(value) => onChangeSort(value as NftSort)}>
           <SelectTrigger className="border-none bg-transparent px-0 text-foreground shadow-none">
-            {/* SelectValue não traduz o valor sozinho — sem isso, mostraria "price-asc" cru na tela. */}
             <SelectValue>{(value: NftSort) => SORT_LABELS[value]}</SelectValue>
           </SelectTrigger>
           <SelectContent>

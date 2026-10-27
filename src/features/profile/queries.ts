@@ -21,7 +21,6 @@ export function useUpdateProfile() {
     mutationFn: (input: UpdateProfileInput) => updateProfile(input),
     onSuccess: (profile) => {
       queryClient.setQueryData(profileKeys.all, profile);
-      // O header mostra "Olá, <nome>" a partir da sessão — mantém os dois em sincronia.
       queryClient.setQueryData(sessionKeys.all, {
         id: profile.id,
         name: profile.name,

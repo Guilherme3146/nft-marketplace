@@ -14,9 +14,6 @@ export function CartItemRow({ item }: CartItemRowProps) {
   const totalEth = new Decimal(item.edition.priceEth).times(item.qty).toFixed();
 
   return (
-    // Abaixo de md: cartão empilhado (imagem+nome em cima, resto numa linha).
-    // A partir de md: "md:contents" devolve a linha ao grid de 5 colunas do <li> pai,
-    // igual ao desenho original de tabela — mesmas classes, dois layouts.
     <li className="flex flex-col gap-3 rounded-md bg-card p-3 md:grid md:h-[70px] md:grid-cols-[250px_77px_75px_87px_24px] md:items-center md:gap-3 md:p-0 md:pr-6">
       <Link to="/nfts/$id" params={{ id: item.nftId }} className="flex items-center gap-3 overflow-hidden">
         <img

@@ -4,7 +4,6 @@ import { applyScenario } from "../scenarios";
 import { apiPath, errorResponse, resolveUserId } from "../utils";
 
 export const favoritesHandlers = [
-  // GET /api/favorites
   http.get(apiPath("/favorites"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;
@@ -13,7 +12,6 @@ export const favoritesHandlers = [
     return HttpResponse.json({ nftIds: getDb().favoritesByUser[userId] ?? [] });
   }),
 
-  // POST /api/favorites  { nftId }
   http.post(apiPath("/favorites"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;
@@ -33,7 +31,6 @@ export const favoritesHandlers = [
     return HttpResponse.json({ nftIds: db.favoritesByUser[userId] ?? [] });
   }),
 
-  // DELETE /api/favorites/:nftId
   http.delete(apiPath("/favorites/:nftId"), async ({ request, params }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;

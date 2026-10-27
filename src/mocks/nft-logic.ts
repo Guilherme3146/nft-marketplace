@@ -10,7 +10,6 @@ import type {
 } from '@/features/nfts/types'
 import { NFT_CATEGORIES, NFT_SORTS } from '@/features/nfts/types'
 
-/** Campos "derivados" (menor preço e total disponível) precisam ser recalculados quando uma edição muda. */
 export function recomputeDerived(nft: Nft): void {
   nft.priceEth = Decimal.min(...nft.editions.map((edition) => edition.priceEth)).toFixed()
   nft.available = nft.editions.reduce((sum, edition) => sum + edition.available, 0)
@@ -58,7 +57,6 @@ function parseInteger(value: string | null, fallback: number, min: number, max: 
   return Math.min(max, Math.max(min, parsed))
 }
 
-/** Query string -> parâmetros validados. A API nunca confia no que chega da URL. */
 export function parseListParams(searchParams: URLSearchParams): ParsedListParams {
   const categories = searchParams.getAll('category').filter(isCategory)
   const collections = searchParams.getAll('collection')
@@ -91,7 +89,6 @@ const comparators: Record<NftSort, (a: Nft, b: Nft) => number> = {
   'price-desc': (a, b) => new Decimal(b.priceEth).cmp(a.priceEth),
 }
 
-/** Busca + filtros combináveis + ordenação + paginação. Os filtros se somam (E lógico). */
 export function queryNfts(all: Nft[], params: ParsedListParams): NftListResponse {
   const term = params.q?.toLowerCase()
   const filtered = all.filter((nft) => {
@@ -117,7 +114,6 @@ export function queryNfts(all: Nft[], params: ParsedListParams): NftListResponse
     pageSize: params.pageSize,
     total,
     totalPages,
-    // Contagens sobre o catálogo inteiro (simples e estável para a interface de filtros).
     facets: {
       categories: countBy(all.map((nft) => nft.category)),
       collections: countBy(all.map((nft) => nft.collection)),

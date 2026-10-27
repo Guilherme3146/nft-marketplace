@@ -12,7 +12,6 @@ interface NftRealtimeUpdate {
   version: number;
 }
 
-/** Só aplica o evento se ele for de um NFT diferente ou mais novo que o que já temos. */
 function reconcileNft<T extends NftSummary>(item: T, update: NftRealtimeUpdate): T {
   if (item.id !== update.id) return item;
   if (update.version <= item.version) return item;
@@ -25,11 +24,6 @@ function reconcileNft<T extends NftSummary>(item: T, update: NftRealtimeUpdate):
   };
 }
 
-/**
- * Liga uma vez, no app inteiro (chamado em __root.tsx): ouve o canal de
- * tempo real e aplica cada evento direto no cache do TanStack Query — sem
- * refetch, sem esperar a próxima visita à tela.
- */
 export function useRealtimeNftUpdates() {
   const queryClient = useQueryClient();
 

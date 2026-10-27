@@ -16,7 +16,6 @@ function toProfile(user: UserFixture) {
 }
 
 export const profileHandlers = [
-  // GET /api/profile
   http.get(apiPath("/profile"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;
@@ -26,7 +25,6 @@ export const profileHandlers = [
     return HttpResponse.json(toProfile(user));
   }),
 
-  // PATCH /api/profile  { name, username, email, ensName, walletNickname }
   http.patch(apiPath("/profile"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;
@@ -48,7 +46,6 @@ export const profileHandlers = [
     return HttpResponse.json(toProfile(user));
   }),
 
-  // PATCH /api/profile/password  { currentPassword, newPassword }
   http.patch(apiPath("/profile/password"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;

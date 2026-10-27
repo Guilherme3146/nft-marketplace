@@ -28,11 +28,6 @@ export function useAddToCart() {
   });
 }
 
-/**
- * Atualização otimista: a quantidade muda na hora do clique, antes da API
- * responder; qty 0 remove a linha. Mesmo padrão de snapshot+rollback dos
- * favoritos (onMutate guarda o estado anterior, onError devolve ele).
- */
 export function useUpdateCartItemQty() {
   const queryClient = useQueryClient();
 

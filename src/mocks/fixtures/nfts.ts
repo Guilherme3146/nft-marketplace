@@ -2,11 +2,6 @@ import Decimal from 'decimal.js'
 import type { Nft, NftCategory, NftEdition } from '@/features/nfts/types'
 import { recomputeDerived } from '../nft-logic'
 
-/**
- * Dados DETERMINÍSTICOS: mesma semente, mesmos NFTs, sempre.
- * Isso é o que torna testes e regressão visual estáveis.
- * Nada aqui usa Math.random() nem Date.now().
- */
 function createRandom(seed: number) {
   let state = seed
   return () => {
@@ -28,10 +23,6 @@ const EDITION_TEMPLATES = [
   { id: 'genesis', label: 'Genesis', multiplier: '3', total: 5 },
 ]
 
-/**
- * Arte gerada (SVG em data URI): funciona offline e sem hospedar imagens.
- * Troque pelos assets reais do Figma em /public/assets quando tiver acesso a eles.
- */
 function artDataUri(seed: number, variant: number): string {
   const hueA = (seed * 47 + variant * 31) % 360
   const hueB = (hueA + 70 + ((seed * 13) % 90)) % 360
@@ -55,14 +46,12 @@ export const NFT_COUNT = 48
 function buildNft(index: number): Nft {
   const random = createRandom(index + 1)
   const number = index + 1
-  const soldOut = number % 9 === 0 // NFTs 9, 18, 27, 36, 45 nascem esgotados
+  const soldOut = number % 9 === 0
   const basePrice = new Decimal((0.05 + random() * 5).toFixed(3))
   const images = [0, 1, 2].map((variant) => artDataUri(number, variant))
 
   const editions: NftEdition[] = EDITION_TEMPLATES.slice(0, 1 + (index % 3)).map((template) => {
-    const drawn = 1 + Math.floor(random() * template.total) // sempre >= 1
-    // NFTs 9, 18, 27, 36 e 45 estão esgotados por inteiro.
-    // NFTs 21 e 42 têm só a edição Genesis esgotada (o NFT continua à venda).
+    const drawn = 1 + Math.floor(random() * template.total)
     const editionSoldOut = soldOut || (template.id === 'genesis' && number % 7 === 0)
     return {
       id: template.id,
@@ -85,8 +74,8 @@ function buildNft(index: number): Nft {
     creatorName,
     category,
     coverUrl: images[0],
-    priceEth: '0', // recalculado logo abaixo
-    available: 0, // recalculado logo abaixo
+    priceEth: '0',
+    available: 0,
     likes: Math.floor(random() * 2000),
     version: 1,
     description: `${name} faz parte da coleção ${collection}, criada por ${creatorName}. Uma peça de ${category} em edição limitada, com autenticidade registrada na rede.`,

@@ -7,10 +7,6 @@ interface NftRelatedProps {
   excludeId: string;
 }
 
-/**
- * "Mais desta coleção": query própria, filtrada pela mesma coleção do NFT
- * aberto — não depende de nenhum estado do catálogo principal.
- */
 export function NftRelated({ collection, excludeId }: NftRelatedProps) {
   const query = useQuery(
     nftListQueryOptions({ collection: [collection], page: 1, pageSize: 6 }),

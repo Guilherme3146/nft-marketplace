@@ -8,10 +8,6 @@
 */
 @custom-variant dark (&:is(.dark *));
 
-/*
-  Tokens do projeto. Quando você tiver o Figma em mãos, troque estas
-  variáveis pelas cores/fontes reais (Módulo 3 em diante).
-*/
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -73,7 +69,6 @@ html {
   ---break---
 */
 :root {
-  /* Paleta "Kurio" extraída pixel a pixel do export do Figma (Desktop/Início.png). */
   --background: #140d0a;
   --foreground: #f5f1eb;
   --card: #241612;

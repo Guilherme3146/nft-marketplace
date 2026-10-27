@@ -24,7 +24,6 @@ export function AccountFormField({ label, required = true, error, children }: Ac
   );
 }
 
-/** Campo "Nome ENS": input + sufixo fixo ".eth" (o Figma mostra isso como um select de 1 opção só). */
 export function EnsField({ register }: { register: UseFormRegisterReturn }) {
   return (
     <div className="flex h-10 overflow-hidden rounded-[3px] border border-border">

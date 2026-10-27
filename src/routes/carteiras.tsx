@@ -162,7 +162,6 @@ function CarteirasPage() {
           </button>
         </form>
 
-        {/* Gerenciar múltiplas carteiras é fora do escopo deste desafio — só a carteira principal é funcional (ver ARCHITECTURE.md). */}
         <div className="flex flex-col gap-3 border-t border-border pt-6">
           <h2 className="text-[17px] font-bold text-foreground">Carteira secundária</h2>
           <p className="text-sm text-muted-foreground">

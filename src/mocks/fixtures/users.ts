@@ -2,7 +2,6 @@ export interface UserFixture {
   id: string
   name: string
   email: string
-  /** Texto puro só porque isso é um mock de estudo — nunca faça isso num backend real. */
   password: string
   username: string
   ensName: string

@@ -6,7 +6,6 @@ interface AccountSidebarProps {
   active: "perfil" | "carteiras";
 }
 
-/** Sem tela/requisito correspondente no escopo deste desafio (ver ARCHITECTURE.md). */
 const DISABLED_ITEMS = [
   { label: "Atividade", Icon: ShoppingBag },
   { label: "Lista de interesse", Icon: Heart },

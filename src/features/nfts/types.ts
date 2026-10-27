@@ -1,4 +1,3 @@
-/** ETH sempre trafega como string decimal ("0.25"). Nunca use number para dinheiro. */
 export type Eth = string
 
 export const NFT_CATEGORIES = ['art', 'music', 'photography', 'gaming', 'collectibles'] as const
@@ -15,7 +14,6 @@ export interface NftEdition {
   total: number
 }
 
-/** Versão resumida: é o que a listagem (cards) recebe. */
 export interface NftSummary {
   id: string
   name: string
@@ -23,16 +21,12 @@ export interface NftSummary {
   creatorName: string
   category: NftCategory
   coverUrl: string
-  /** Menor preço entre as edições. */
   priceEth: Eth
-  /** Soma das unidades disponíveis de todas as edições. */
   available: number
   likes: number
-  /** Cresce a cada alteração; é como o cliente descarta eventos antigos (Socket.IO). */
   version: number
 }
 
-/** Versão completa: é o que a tela de detalhe recebe. */
 export interface Nft extends NftSummary {
   description: string
   images: string[]

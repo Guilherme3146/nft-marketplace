@@ -3,7 +3,6 @@ import { getDb, persistDb } from "../db";
 import { applyScenario } from "../scenarios";
 import { apiPath, errorResponse, resolveUserId } from "../utils";
 
-/** Junta cada linha do carrinho (só IDs + qty) com os dados reais do NFT/edição. Reaproveitada pelo checkout. */
 export function resolveCartItems(userId: string) {
   const db = getDb();
   const records = db.cartByUser[userId] ?? [];
@@ -24,7 +23,6 @@ export function resolveCartItems(userId: string) {
 }
 
 export const cartHandlers = [
-  // GET /api/cart
   http.get(apiPath("/cart"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;
@@ -32,7 +30,6 @@ export const cartHandlers = [
     return HttpResponse.json({ items: resolveCartItems(resolveUserId(request)) });
   }),
 
-  // POST /api/cart  { nftId, editionId, qty }
   http.post(apiPath("/cart"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;
@@ -61,7 +58,6 @@ export const cartHandlers = [
     return HttpResponse.json({ items: resolveCartItems(userId) });
   }),
 
-  // PATCH /api/cart/:nftId/:editionId  { qty }
   http.patch(apiPath("/cart/:nftId/:editionId"), async ({ request, params }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;

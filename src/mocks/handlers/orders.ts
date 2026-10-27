@@ -8,7 +8,6 @@ import { NETWORK_FEE_ETH } from "@/features/cart/constants";
 import type { Order } from "@/features/orders/types";
 
 export const ordersHandlers = [
-  // POST /api/orders  { idempotencyKey, walletType, note }
   http.post(apiPath("/orders"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;
@@ -26,8 +25,6 @@ export const ordersHandlers = [
     const db = getDb();
     const existingOrders = db.ordersByUser[userId] ?? [];
 
-    // Mesma tentativa de checkout reenviada (ex.: duplo clique, retry de rede):
-    // devolve o pedido que já existe em vez de criar outro.
     const duplicate = existingOrders.find((order) => order.id === body.idempotencyKey);
     if (duplicate) return HttpResponse.json(duplicate);
 
@@ -43,7 +40,6 @@ export const ordersHandlers = [
     const total = subtotal.plus(NETWORK_FEE_ETH);
 
     const order: Order = {
-      // O id do pedido É a chave de idempotência — é assim que o reenvio acima encontra o duplicado.
       id: body.idempotencyKey,
       items: items.map(({ nftId, editionId, qty, nft, edition }) => ({
         nftId,
@@ -67,7 +63,6 @@ export const ordersHandlers = [
     return HttpResponse.json(order);
   }),
 
-  // GET /api/orders/:id
   http.get(apiPath("/orders/:id"), async ({ request, params }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;

@@ -50,7 +50,6 @@ test.describe('Carrinho e Checkout', () => {
   test('fluxo completo: carteira -> carrinho -> pagamento -> confirmação', async ({ page }) => {
     await login(page)
 
-    // Checkout exige uma carteira principal cadastrada.
     await page.goto('/carteiras')
     await page.getByLabel('Nome de exibição').fill('Ana Collector')
     await page.getByLabel('Apelido da carteira').fill('Carteira principal')
@@ -62,8 +61,6 @@ test.describe('Carrinho e Checkout', () => {
     await page.getByLabel('E-mail').fill('ana@kurio.test')
     await page.getByLabel('Nome ENS').fill('ana')
 
-    // Espera o PUT de verdade terminar antes de recarregar — senão o reload
-    // cancela a requisição no meio do caminho e nada fica salvo.
     await Promise.all([
       page.waitForResponse((res) => res.url().includes('/wallets/primary') && res.status() === 200),
       page.getByRole('button', { name: 'Salvar carteira' }).click(),
@@ -74,13 +71,11 @@ test.describe('Carrinho e Checkout', () => {
       '0x1234567890123456789012345678901234567890',
     )
 
-    // Adiciona um NFT ao carrinho.
     await page.goto('/')
     await page.locator('ul[aria-busy] > li a').first().click()
     await page.getByRole('button', { name: 'COMPRAR' }).click()
     await expect(page).toHaveURL('/carrinho')
 
-    // Finaliza a compra.
     await page.getByRole('link', { name: 'Conectar e finalizar' }).click()
     await expect(page).toHaveURL('/pagamento')
     await page.getByRole('button', { name: 'Confirmar compra' }).click()
@@ -90,7 +85,6 @@ test.describe('Carrinho e Checkout', () => {
       page.getByRole('heading', { name: 'Seus NFTs agora estão na sua carteira' }),
     ).toBeVisible()
 
-    // O carrinho foi esvaziado pelo checkout.
     await page.goto('/carrinho')
     await expect(page.getByRole('heading', { name: 'Seu carrinho está vazio' })).toBeVisible()
   })

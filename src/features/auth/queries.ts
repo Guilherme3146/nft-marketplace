@@ -11,7 +11,6 @@ export function sessionQueryOptions() {
   return queryOptions({
     queryKey: sessionKeys.all,
     queryFn: ({ signal }) => fetchMe(signal),
-    // Sem crachá salvo, nem vale a pena perguntar pro servidor quem está logado.
     enabled: !!getToken(),
     retry: false,
   });
@@ -29,9 +28,6 @@ export function useLogin() {
     onSuccess: ({ user, token }) => {
       setToken(token);
       queryClient.setQueryData<User>(sessionKeys.all, user);
-      // A identidade mudou: tudo que o cache guardava (favoritos, carrinho...)
-      // pode ser de outra pessoa. Mais simples e seguro jogar tudo fora e
-      // deixar cada tela buscar de novo, já com o crachá novo.
       void queryClient.invalidateQueries();
     },
   });

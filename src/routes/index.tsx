@@ -16,11 +16,6 @@ import { useEffect, useState } from "react";
 
 const PAGE_SIZE = 12;
 
-/**
- * O estado da página vive na URL (/?page=2). Assim ele sobrevive a refresh,
- * ao botão "voltar" e pode ser compartilhado. O .catch(1) troca qualquer
- * valor inválido (?page=abc) por 1 em vez de quebrar a tela.
- */
 const searchSchema = z.object({
   page: z.coerce.number().int().min(1).default(1).catch(1),
   q: z.string().optional().catch(undefined),
@@ -82,9 +77,6 @@ function HomePage() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       const nextQ = searchInput || undefined;
-      // Sem isso, este efeito dispara em TODA montagem (mesmo sem digitar nada)
-      // e sempre reseta a página pra 1 — o que apagava, por exemplo, um link
-      // direto pra "/?page=2".
       if (nextQ !== q) setFilter({ q: nextQ });
     }, 300);
 

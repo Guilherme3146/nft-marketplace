@@ -4,7 +4,6 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-// A ordem importa: o plugin do TanStack Router precisa vir ANTES do plugin do React.
 export default defineConfig({
   plugins: [
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),

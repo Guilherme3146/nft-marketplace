@@ -14,11 +14,6 @@ export function orderQueryOptions(id: string) {
   });
 }
 
-/**
- * SEM otimismo de propósito: diferente de favoritos/carrinho, aqui a tela só
- * avança pra confirmação depois que o servidor realmente respondeu que o
- * pedido foi criado — nunca antes.
- */
 export function useCreateOrder() {
   const queryClient = useQueryClient();
 
@@ -26,7 +21,6 @@ export function useCreateOrder() {
     mutationFn: (input: CreateOrderInput) => createOrder(input),
     onSuccess: (order) => {
       queryClient.setQueryData(orderKeys.detail(order.id), order);
-      // A compra esvaziou o carrinho no servidor; o cache local precisa saber disso.
       void queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
   });

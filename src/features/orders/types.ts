@@ -21,7 +21,6 @@ export interface Order {
 }
 
 export interface CreateOrderInput {
-  /** Gerado uma vez no navegador por tentativa de checkout; impede pedido duplicado em reenvio. */
   idempotencyKey: string;
   walletType: WalletType;
   note?: string;

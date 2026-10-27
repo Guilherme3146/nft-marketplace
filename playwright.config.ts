@@ -1,10 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
 
-/**
- * Os testes rodam contra o build de produção (vite preview) com a API simulada ligada
- * (.env.production). Cada teste ganha um contexto novo = localStorage limpo = banco
- * simulado no estado inicial (isolamento).
- */
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,

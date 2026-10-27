@@ -17,12 +17,6 @@ export function useFavorites() {
   return useQuery(favoritesQueryOptions());
 }
 
-/**
- * Atualização otimista: o coração muda na hora do clique, antes da resposta
- * da API chegar. Se a chamada falhar, onError devolve o snapshot exato de
- * antes (não um valor chutado). onSettled sempre revalida com o servidor
- * no final, sucesso ou erro.
- */
 export function useToggleFavorite() {
   const queryClient = useQueryClient();
 

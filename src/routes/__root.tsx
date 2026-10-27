@@ -38,8 +38,6 @@ function RootLayout() {
             KURIO
           </Link>
 
-          {/* Abaixo de md (768px), o menu não cabe sem quebrar — escondido de propósito,
-              o catálogo continua alcançável pelo logo. */}
           <nav aria-label="Principal" className="hidden items-center gap-10 text-[15px] font-medium md:flex">
             <Link to="/" className="text-foreground" activeProps={{ className: 'text-accent' }}>
               Início
@@ -47,7 +45,6 @@ function RootLayout() {
             <Link to="/" className="text-foreground" activeProps={{ className: 'text-accent' }}>
               Mercado
             </Link>
-            {/* "Criadores" e "Aprenda" não têm tela correspondente no escopo deste desafio (ver ARCHITECTURE.md). */}
             <span className="cursor-not-allowed text-muted-foreground">Criadores</span>
             <span className="cursor-not-allowed text-muted-foreground">Aprenda</span>
           </nav>
@@ -101,7 +98,6 @@ function RootLayout() {
       <main id="main" className="mx-auto max-w-7xl px-4 py-8">
         <Outlet />
       </main>
-      {/* Só existe em desenvolvimento: mostra o cache do TanStack Query em tempo real. */}
       <ReactQueryDevtools initialIsOpen={false} />
     </>
   )

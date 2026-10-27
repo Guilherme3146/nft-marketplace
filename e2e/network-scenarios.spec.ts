@@ -23,7 +23,6 @@ test.describe('Cenários de rede simulados (?scenario=)', () => {
     await expect(
       page.getByText('Erro interno simulado pelo cenário "server-error".'),
     ).toBeVisible()
-    // Continua na tela de login — nenhuma navegação indevida aconteceu.
     await expect(page).toHaveURL(/\/login/)
   })
 })

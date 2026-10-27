@@ -4,7 +4,6 @@ import { getDb, persistDb } from "../db";
 
 const UPDATE_INTERVAL_MS = 4000;
 
-/** Mesmo truque do apiPath: "*" casa qualquer origem (localhost, Vercel...). */
 const realtimeChannel = ws.link("*/socket.io/*");
 
 export const realtimeHandlers = [
@@ -18,7 +17,6 @@ export const realtimeHandlers = [
       const nft = db.nfts[Math.floor(Math.random() * db.nfts.length)];
       nft.likes += 1;
 
-      // 30% das vezes, simula também alguém comprando uma edição (estoque cai ao vivo).
       if (Math.random() < 0.3) {
         const inStock = nft.editions.filter((edition) => edition.available > 0);
         if (inStock.length > 0) {

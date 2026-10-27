@@ -5,7 +5,6 @@ import { applyScenario, getScenario } from '../scenarios'
 import { apiPath, errorResponse } from '../utils'
 
 export const nftHandlers = [
-  // GET /api/nfts?q=&category=&collection=&minPrice=&maxPrice=&availableOnly=&sort=&page=&pageSize=
   http.get(apiPath('/nfts'), async ({ request }) => {
     const failure = await applyScenario(request)
     if (failure) return failure
@@ -15,7 +14,6 @@ export const nftHandlers = [
     return HttpResponse.json(queryNfts(catalog, params))
   }),
 
-  // GET /api/nfts/:id
   http.get(apiPath('/nfts/:id'), async ({ request, params }) => {
     const failure = await applyScenario(request)
     if (failure) return failure

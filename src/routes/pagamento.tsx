@@ -37,7 +37,6 @@ export const Route = createFileRoute("/pagamento")({
       context.queryClient.ensureQueryData(profileQueryOptions()),
       context.queryClient.ensureQueryData(primaryWalletQueryOptions()),
     ]);
-    // Não dá pra ir pro checkout com a cesta vazia.
     if (cart.items.length === 0) throw redirect({ to: "/carrinho" });
   },
   component: PagamentoPage,
@@ -50,9 +49,6 @@ function PagamentoPage() {
   const { data: wallet } = useSuspenseQuery(primaryWalletQueryOptions());
   const createOrder = useCreateOrder();
 
-  // Gerada uma vez só quando a tela monta: reenvios desta mesma tentativa de
-  // checkout (ex.: duplo clique) usam a MESMA chave, então o servidor nunca
-  // cria dois pedidos pro mesmo clique.
   const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const {

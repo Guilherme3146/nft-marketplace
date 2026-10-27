@@ -117,7 +117,6 @@ function ConfirmacaoPage() {
           Transação confirmada na Ethereum. A propriedade foi transferida para sua carteira
           conectada e registrada na rede.
         </p>
-        {/* Sem blockchain de verdade no desafio: botão ilustrativo, sem link real pro Etherscan (ver ARCHITECTURE.md). */}
         <button
           type="button"
           disabled

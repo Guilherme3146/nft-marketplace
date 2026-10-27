@@ -2,7 +2,19 @@
 
 Marketplace de NFTs em React + TypeScript, com API **simulada** (MSW), tempo real simulado (Socket.IO sobre MSW) e testes E2E (Playwright). Desafio de front-end.
 
-> Estado atual: catálogo, Detalhe do NFT, Carrinho, Conta/Sessão, Perfil/Carteiras, Pagamento/Confirmação de pedido, Tempo real, layout responsivo (mobile-first) e testes E2E (Playwright, 46/46 — desktop e mobile) prontos. As seções marcadas com ⏳ são preenchidas à medida que cada módulo é entregue.
+> Estado atual: catálogo, Detalhe do NFT, Carrinho, Conta/Sessão, Perfil/Carteiras, Pagamento/Confirmação de pedido, Tempo real, layout responsivo (mobile-first) e testes E2E (Playwright, 46/46 — desktop e mobile) prontos.
+
+## Funcionalidades
+
+- **Catálogo** — busca, filtros (categoria, faixa de preço), ordenação, paginação e destaque, tudo refletido na URL.
+- **Detalhe do NFT** — galeria de imagens, seleção de edição, quantidade e favoritar.
+- **Carrinho** — itens, alteração de quantidade, remoção e resumo de valores.
+- **Conta** — cadastro, login, logout e sessão; favoritos e carrinho isolados por usuário.
+- **Perfil e Carteiras** — edição de dados pessoais, troca de senha e cadastro de carteira (rotas protegidas).
+- **Pagamento e Confirmação de pedido** — checkout reaproveitando a carteira já cadastrada, idempotente e sem atualização otimista.
+- **Tempo real** — curtidas e estoque atualizando sozinhos via Socket.IO, com reconciliação por número de versão.
+- **Responsivo** — layout mobile-first em todas as telas.
+- **Testes E2E** — 46 testes Playwright (projetos desktop e mobile).
 
 ## Stack
 
@@ -32,11 +44,9 @@ npm run typecheck      # verificação de tipos
 npm run lint           # lint
 npm run build          # typecheck + build de produção (dist/)
 npm run preview        # serve o build em http://localhost:4173 (também com mocks)
-npx playwright install chromium   # só na 1ª vez
-npm run test:e2e       # testes Playwright (faz build + preview sozinho)
 ```
 
-⏳ Auditoria Lighthouse: será adicionada com o script `npm run lighthouse`.
+Instruções de teste E2E na seção [Testes](#testes), mais abaixo.
 
 ## Variáveis de ambiente
 
@@ -80,12 +90,32 @@ Dois usuários de demonstração (ou cadastre uma conta nova em `/cadastro`):
 
 ```
 src/
-  routes/            rotas (um arquivo = uma rota; routeTree.gen.ts é gerado)
-  features/nfts/     tipos, chamadas Axios e queries do TanStack Query
-  lib/               cliente Axios (api.ts) e QueryClient (query-client.ts)
-  mocks/             MSW: handlers, db, fixtures, cenários
-e2e/                 testes Playwright
+  routes/              rotas (um arquivo = uma rota; routeTree.gen.ts é gerado)
+  features/
+    nfts/              catálogo, detalhe, busca/filtros
+    favorites/         favoritos
+    cart/              carrinho
+    auth/              cadastro, login, sessão
+    profile/           dados do perfil
+    wallets/           carteira principal
+    orders/            pedidos e checkout
+    account/           componentes compartilhados de perfil/carteiras
+  lib/                 cliente Axios (api.ts), socket (socket.ts), QueryClient (query-client.ts)
+  mocks/               MSW: handlers, db, fixtures, cenários de rede
+e2e/                   testes Playwright
 ```
+
+Cada pasta em `features/` segue o mesmo padrão: `types.ts` (formato dos dados) → `api.ts` (chamadas Axios) → `queries.ts` (hooks do TanStack Query) → `components/` (telas e peças de UI).
+
+## Testes
+
+```bash
+npx playwright install chromium   # só na 1ª vez
+npm run test:e2e                  # desktop + mobile
+npm run test:e2e:ui               # modo interativo
+```
+
+46 testes cobrindo catálogo, Detalhe do NFT, carrinho/checkout completo, conta/sessão e cenários de rede simulados, rodando contra o build de produção em dois tamanhos de viewport (1440px e 390px). Detalhes em [ARCHITECTURE.md](./ARCHITECTURE.md#71-testes-e2e-playwright).
 
 ## Deploy (Vercel)
 

@@ -4,12 +4,10 @@ import { applyScenario } from "../scenarios";
 import { apiPath, errorResponse, resolveUserId } from "../utils";
 import type { UserFixture } from "../fixtures/users";
 
-/** Nunca devolve o campo "password" pro cliente. */
 function toPublicUser(user: UserFixture) {
   return { id: user.id, name: user.name, email: user.email };
 }
 
-/** Cria um crachá novo (token aleatório) e anota no "livro de sessões" quem é o dono. */
 function createSession(userId: string) {
   const db = getDb();
   const token = crypto.randomUUID();
@@ -19,7 +17,6 @@ function createSession(userId: string) {
 }
 
 export const authHandlers = [
-  // POST /api/auth/login  { email, password }
   http.post(apiPath("/auth/login"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;
@@ -34,7 +31,6 @@ export const authHandlers = [
     return HttpResponse.json({ user: toPublicUser(user), token: createSession(user.id) });
   }),
 
-  // POST /api/auth/register  { name, email, password }
   http.post(apiPath("/auth/register"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;
@@ -66,7 +62,6 @@ export const authHandlers = [
     return HttpResponse.json({ user: toPublicUser(user), token: createSession(user.id) });
   }),
 
-  // POST /api/auth/logout
   http.post(apiPath("/auth/logout"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;
@@ -80,7 +75,6 @@ export const authHandlers = [
     return HttpResponse.json({ ok: true });
   }),
 
-  // GET /api/auth/me
   http.get(apiPath("/auth/me"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;

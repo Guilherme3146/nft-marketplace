@@ -7,7 +7,6 @@ import type { Wallet } from "@/features/wallets/types";
 const ADDRESS_PATTERN = /^0x[a-fA-F0-9]{40}$/;
 
 export const walletsHandlers = [
-  // GET /api/wallets/primary
   http.get(apiPath("/wallets/primary"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;
@@ -15,7 +14,6 @@ export const walletsHandlers = [
     return HttpResponse.json(getDb().walletsByUser[resolveUserId(request)] ?? null);
   }),
 
-  // PUT /api/wallets/primary
   http.put(apiPath("/wallets/primary"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;

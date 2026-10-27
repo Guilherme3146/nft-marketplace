@@ -11,8 +11,6 @@ test.describe('Conta e sessão', () => {
     await page.locator('input[placeholder="Confirmar senha"]').fill('mock1234')
     await page.getByRole('button', { name: 'Criar conta' }).click()
 
-    // No mobile o header mostra só um ícone (sem o nome) — checamos o perfil direto,
-    // que funciona em qualquer tamanho de tela.
     await page.getByRole('button', { name: 'Sair' }).waitFor()
     await page.goto('/perfil')
     await expect(page.getByLabel('Nome de exibição')).toHaveValue('Teste E2E')

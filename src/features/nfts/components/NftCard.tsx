@@ -6,13 +6,6 @@ interface NftCardProps {
   nft: NftSummary;
 }
 
-/**
- * Card usado tanto no grid do catálogo quanto na seção de destaques —
- * mesmo componente, dado diferente. Sem favoritar aqui: o README lista
- * "favoritos" como requisito da tela de Detalhes do NFT, não do catálogo,
- * e o Figma também só mostra o coração como um estado ilustrativo
- * pontual, não em todo card.
- */
 export function NftCard({ nft }: NftCardProps) {
   return (
     <li>
@@ -38,7 +31,6 @@ export function NftCard({ nft }: NftCardProps) {
         <p className="truncate text-sm text-muted-foreground">{nft.collection}</p>
         <div className="mt-1 flex items-center justify-between">
           <p className="text-sm font-medium text-primary">{nft.priceEth} ETH</p>
-          {/* Fora do Figma: evidência visual do tempo real (Socket.IO) atualizando o card sozinho. */}
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Heart className="size-3" />
             {nft.likes}

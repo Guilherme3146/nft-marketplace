@@ -35,9 +35,6 @@ export const Route = createFileRoute("/nfts/$id")({
 
 function NftDetailPage() {
   const { id } = Route.useParams();
-  // useSuspenseQuery: o loader já garantiu o dado no cache, então o tipo
-  // de "nft" aqui é sempre definido (nunca undefined) — sem precisar de
-  // "if (!nft) return null" nem risco de pular hooks condicionalmente.
   const { data: nft } = useSuspenseQuery(nftDetailQueryOptions(id));
 
   const [selectedEditionId, setSelectedEditionId] = useState(
@@ -88,7 +85,6 @@ function NftDetailPage() {
             <h1 className="text-[28px] font-bold text-foreground">{nft.name}</h1>
             <div className="flex items-center gap-3">
               <p className="text-xl font-bold text-accent">{nft.priceEth} ETH</p>
-              {/* Fora do Figma: evidência visual do tempo real (Socket.IO) atualizando sozinho. */}
               <span className="text-sm text-muted-foreground">{nft.likes} curtidas</span>
             </div>
 

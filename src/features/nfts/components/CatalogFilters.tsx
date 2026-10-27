@@ -5,11 +5,6 @@ import { Slider } from "@/components/ui/slider";
 import type { NftCategory, NftListResponse } from "../types";
 import { CATEGORY_LABELS } from "../category-labels";
 
-/**
- * A API não devolve "rede" (network) — não existe esse campo no nosso
- * modelo de dado nem na listagem. Mantemos a seção só visualmente, igual
- * ao Figma, mas sem filtrar nada de verdade (documentado em ARCHITECTURE.md).
- */
 const NETWORKS = [
   { name: "Ethereum", count: 119 },
   { name: "Polygon", count: 78 },

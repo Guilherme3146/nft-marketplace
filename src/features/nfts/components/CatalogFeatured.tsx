@@ -1,12 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { nftListQueryOptions } from "../queries";
 
-/**
- * Painel de destaque da barra lateral (bate com o Figma "Featured NFT
- * Banner"): mostra o NFT mais popular do catálogo. É uma query própria e
- * independente dos filtros que o usuário está usando no grid principal —
- * senão o destaque "somaria" ao filtro errado.
- */
 export function CatalogFeatured() {
   const query = useQuery(
     nftListQueryOptions({ sort: "popular", page: 1, pageSize: 1 }),

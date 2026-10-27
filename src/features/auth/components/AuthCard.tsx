@@ -7,11 +7,6 @@ interface AuthCardProps {
   children: ReactNode;
 }
 
-/**
- * O Figma mostra login/cadastro como um modal flutuando sobre o catálogo.
- * Simplificamos para páginas próprias (/login, /cadastro) com este mesmo
- * cartão — sem duplicar o catálogo de fundo, que ali é só cenário decorativo.
- */
 export function AuthCard({ active, subtitle, children }: AuthCardProps) {
   return (
     <div className="mx-auto flex w-full max-w-[500px] flex-col overflow-hidden rounded-lg bg-card">
@@ -42,7 +37,6 @@ export function AuthCard({ active, subtitle, children }: AuthCardProps) {
           Ou continue com
           <hr className="flex-1 border-border" />
         </div>
-        {/* Sem backend social (Google/Facebook) no desafio — só visual, documentado em ARCHITECTURE.md. */}
         <button
           type="button"
           disabled
