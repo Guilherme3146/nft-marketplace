@@ -1,0 +1,65 @@
+import { Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
+
+interface AuthCardProps {
+  active: "login" | "cadastro";
+  subtitle: string;
+  children: ReactNode;
+}
+
+/**
+ * O Figma mostra login/cadastro como um modal flutuando sobre o catálogo.
+ * Simplificamos para páginas próprias (/login, /cadastro) com este mesmo
+ * cartão — sem duplicar o catálogo de fundo, que ali é só cenário decorativo.
+ */
+export function AuthCard({ active, subtitle, children }: AuthCardProps) {
+  return (
+    <div className="mx-auto flex w-[500px] flex-col overflow-hidden rounded-lg bg-card">
+      <div className="flex flex-col gap-6 px-20 pt-12">
+        <div className="flex items-center gap-4 text-xl font-medium">
+          <Link
+            to="/login"
+            className={active === "login" ? "text-accent" : "text-foreground"}
+          >
+            Entrar
+          </Link>
+          <span className="text-text-coral">|</span>
+          <Link
+            to="/cadastro"
+            className={active === "cadastro" ? "text-accent" : "text-foreground"}
+          >
+            Criar conta
+          </Link>
+        </div>
+        <p className="text-center text-[13px] text-muted-foreground">{subtitle}</p>
+      </div>
+
+      <div className="flex flex-col gap-3 px-20 pt-6">{children}</div>
+
+      <div className="flex flex-col gap-3 px-20 pb-8 pt-6">
+        <div className="flex items-center gap-3 text-[13px] text-muted-foreground">
+          <hr className="flex-1 border-border" />
+          Ou continue com
+          <hr className="flex-1 border-border" />
+        </div>
+        {/* Sem backend social (Google/Facebook) no desafio — só visual, documentado em ARCHITECTURE.md. */}
+        <button
+          type="button"
+          disabled
+          className="h-10 cursor-not-allowed rounded-[5px] border border-border text-[13px] font-medium text-secondary opacity-60"
+        >
+          Continuar com Google
+        </button>
+        <button
+          type="button"
+          disabled
+          className="h-10 cursor-not-allowed rounded-[5px] border border-border text-[13px] font-medium text-secondary opacity-60"
+        >
+          Continuar com Facebook
+        </button>
+      </div>
+
+      <div className="h-[10px] w-full bg-primary" />
+    </div>
+  );
+}

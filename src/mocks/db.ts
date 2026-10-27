@@ -1,10 +1,11 @@
 import type { Nft } from '@/features/nfts/types'
 import { nftFixtures } from './fixtures/nfts'
+import { userFixtures, type UserFixture } from './fixtures/users'
 
 /**
  * "Banco de dados" da API simulada: vive em memória e é espelhado no localStorage
  * para sobreviver a refresh. resetDb() volta SEMPRE para o mesmo estado conhecido.
- * Nos próximos módulos entram aqui: users, sessions, favorites, carts, orders, wallets.
+ * Nos próximos módulos entram aqui: carts, orders, wallets.
  */
 export interface CartRecord {
   nftId: string
@@ -14,16 +15,29 @@ export interface CartRecord {
 
 export interface MockDb {
   nfts: Nft[]
-  favorites: string[]
-  cart: CartRecord[]
+  /** Uma lista de favoritos/carrinho por usuário; "guest" é quem não está logado. */
+  favoritesByUser: Record<string, string[]>
+  cartByUser: Record<string, CartRecord[]>
+  users: UserFixture[]
+  /** token → userId. "Sessão" fake: só um mapa em memória, sem JWT de verdade. */
+  sessions: Record<string, string>
 }
 
-const STORAGE_KEY = 'nft-marketplace:mock-db:v1'
+export const GUEST_USER_ID = 'guest'
+
+/** Muda sempre que o formato do MockDb muda, pra dado salvo no formato antigo ser ignorado em vez de quebrar o app. */
+const STORAGE_KEY = 'nft-marketplace:mock-db:v2'
 
 const hasStorage = () => typeof localStorage !== 'undefined'
 
 function seed(): MockDb {
-  return { nfts: structuredClone(nftFixtures), favorites: [], cart: [] }
+  return {
+    nfts: structuredClone(nftFixtures),
+    favoritesByUser: {},
+    cartByUser: {},
+    users: structuredClone(userFixtures),
+    sessions: {},
+  }
 }
 
 function load(): MockDb {

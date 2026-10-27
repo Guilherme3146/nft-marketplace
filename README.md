@@ -2,7 +2,7 @@
 
 Marketplace de NFTs em React + TypeScript, com API **simulada** (MSW), tempo real simulado (Socket.IO sobre MSW) e testes E2E (Playwright). Desafio de front-end.
 
-> Estado atual: catálogo completo (busca, filtros, ordenação, paginação, destaque), tela de Detalhe do NFT (galeria, edição, quantidade, favoritos) e Carrinho (itens, quantidade, remoção, resumo da carteira) prontos. As seções marcadas com ⏳ são preenchidas à medida que cada módulo é entregue.
+> Estado atual: catálogo completo (busca, filtros, ordenação, paginação, destaque), tela de Detalhe do NFT (galeria, edição, quantidade, favoritos), Carrinho (itens, quantidade, remoção, resumo da carteira) e Conta/Sessão (login, cadastro, logout, favoritos/carrinho por usuário) prontos. As seções marcadas com ⏳ são preenchidas à medida que cada módulo é entregue.
 
 ## Stack
 
@@ -69,7 +69,12 @@ Escolha por URL (`/?scenario=slow`), pelo console (`window.__mock.setScenario('o
 
 ## Credenciais fictícias
 
-⏳ Entram no Módulo de login (dois usuários de demonstração).
+Dois usuários de demonstração (ou cadastre uma conta nova em `/cadastro`):
+
+| E-mail | Senha |
+| --- | --- |
+| `ana@kurio.test` | `mock1234` |
+| `bruno@kurio.test` | `mock1234` |
 
 ## Estrutura
 

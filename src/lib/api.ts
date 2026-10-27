@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getToken } from '@/features/auth/token'
 
 /** Formato de erro que TODA resposta de erro da API (real ou simulada) segue. */
 export interface ApiErrorBody {
@@ -34,6 +35,13 @@ export const api = axios.create({
   timeout: 10_000,
   // category=art&category=music (em vez de category[]=art&category[]=music)
   paramsSerializer: { indexes: null },
+})
+
+/** "Interceptor de pedido": roda ANTES de toda chamada sair, pra grudar o crachá nela. */
+api.interceptors.request.use((config) => {
+  const token = getToken()
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
 })
 
 api.interceptors.response.use(

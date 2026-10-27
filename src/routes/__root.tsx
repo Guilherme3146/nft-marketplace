@@ -1,8 +1,9 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router'
-import { LogIn, Search, ShoppingCart } from 'lucide-react'
+import { LogIn, LogOut, Search, ShoppingCart } from 'lucide-react'
 import { useCart } from '@/features/cart/queries'
+import { useLogout, useSession } from '@/features/auth/queries'
 
 export interface RouterContext {
   queryClient: QueryClient
@@ -16,6 +17,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 function RootLayout() {
   const cart = useCart()
   const cartCount = cart.data?.items.reduce((sum, item) => sum + item.qty, 0) ?? 0
+
+  const session = useSession()
+  const logout = useLogout()
 
   return (
     <>
@@ -55,15 +59,29 @@ function RootLayout() {
               ) : null}
             </Link>
 
-            <button
-              type="button"
-              disabled
-              title="Login chega no próximo módulo"
-              className="flex cursor-not-allowed items-center gap-2 rounded-md border border-primary px-4 py-2 text-sm font-medium text-accent opacity-60"
-            >
-              <LogIn className="size-4" />
-              Entrar
-            </button>
+            {session.data ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-foreground">Olá, {session.data.name}</span>
+                <button
+                  type="button"
+                  aria-label="Sair"
+                  title="Sair"
+                  disabled={logout.isPending}
+                  onClick={() => logout.mutate()}
+                  className="text-muted-foreground hover:text-foreground disabled:opacity-60"
+                >
+                  <LogOut className="size-5" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-2 rounded-md border border-primary px-4 py-2 text-sm font-medium text-accent"
+              >
+                <LogIn className="size-4" />
+                Entrar
+              </Link>
+            )}
           </div>
         </div>
       </header>

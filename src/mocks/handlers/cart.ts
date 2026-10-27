@@ -1,12 +1,13 @@
 import { http, HttpResponse } from "msw";
 import { getDb, persistDb } from "../db";
 import { applyScenario } from "../scenarios";
-import { apiPath, errorResponse } from "../utils";
+import { apiPath, errorResponse, resolveUserId } from "../utils";
 
 /** Junta cada linha do carrinho (só IDs + qty) com os dados reais do NFT/edição. */
-function resolveCartItems() {
+function resolveCartItems(userId: string) {
   const db = getDb();
-  return db.cart.flatMap((record) => {
+  const records = db.cartByUser[userId] ?? [];
+  return records.flatMap((record) => {
     const nft = db.nfts.find((item) => item.id === record.nftId);
     const edition = nft?.editions.find((item) => item.id === record.editionId);
     if (!nft || !edition) return [];
@@ -28,7 +29,7 @@ export const cartHandlers = [
     const failure = await applyScenario(request);
     if (failure) return failure;
 
-    return HttpResponse.json({ items: resolveCartItems() });
+    return HttpResponse.json({ items: resolveCartItems(resolveUserId(request)) });
   }),
 
   // POST /api/cart  { nftId, editionId, qty }
@@ -47,15 +48,17 @@ export const cartHandlers = [
       return errorResponse(400, "OUT_OF_STOCK", "Esta edição está esgotada.");
     }
 
+    const userId = resolveUserId(request);
+    const cart = db.cartByUser[userId] ?? (db.cartByUser[userId] = []);
     const qty = Math.max(1, Math.trunc(body.qty ?? 1));
-    const existing = db.cart.find((item) => item.nftId === nft.id && item.editionId === edition.id);
+    const existing = cart.find((item) => item.nftId === nft.id && item.editionId === edition.id);
     if (existing) {
       existing.qty = Math.min(existing.qty + qty, edition.available);
     } else {
-      db.cart.push({ nftId: nft.id, editionId: edition.id, qty: Math.min(qty, edition.available) });
+      cart.push({ nftId: nft.id, editionId: edition.id, qty: Math.min(qty, edition.available) });
     }
     persistDb();
-    return HttpResponse.json({ items: resolveCartItems() });
+    return HttpResponse.json({ items: resolveCartItems(userId) });
   }),
 
   // PATCH /api/cart/:nftId/:editionId  { qty }
@@ -65,19 +68,21 @@ export const cartHandlers = [
 
     const body = (await request.json()) as { qty?: number };
     const db = getDb();
+    const userId = resolveUserId(request);
+    const cart = db.cartByUser[userId] ?? [];
     const nftId = String(params.nftId);
     const editionId = String(params.editionId);
 
     if (!body.qty || body.qty <= 0) {
-      db.cart = db.cart.filter((item) => !(item.nftId === nftId && item.editionId === editionId));
+      db.cartByUser[userId] = cart.filter((item) => !(item.nftId === nftId && item.editionId === editionId));
     } else {
-      const item = db.cart.find((entry) => entry.nftId === nftId && entry.editionId === editionId);
+      const item = cart.find((entry) => entry.nftId === nftId && entry.editionId === editionId);
       const edition = db.nfts.find((nft) => nft.id === nftId)?.editions.find((e) => e.id === editionId);
       if (item && edition) {
         item.qty = Math.min(Math.trunc(body.qty), edition.available);
       }
     }
     persistDb();
-    return HttpResponse.json({ items: resolveCartItems() });
+    return HttpResponse.json({ items: resolveCartItems(userId) });
   }),
 ];

@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { getDb, persistDb } from "../db";
 import { applyScenario } from "../scenarios";
-import { apiPath, errorResponse } from "../utils";
+import { apiPath, errorResponse, resolveUserId } from "../utils";
 
 export const favoritesHandlers = [
   // GET /api/favorites
@@ -9,7 +9,8 @@ export const favoritesHandlers = [
     const failure = await applyScenario(request);
     if (failure) return failure;
 
-    return HttpResponse.json({ nftIds: getDb().favorites });
+    const userId = resolveUserId(request);
+    return HttpResponse.json({ nftIds: getDb().favoritesByUser[userId] ?? [] });
   }),
 
   // POST /api/favorites  { nftId }
@@ -22,12 +23,14 @@ export const favoritesHandlers = [
       return errorResponse(404, "NOT_FOUND", "NFT não encontrado.");
     }
 
+    const userId = resolveUserId(request);
     const db = getDb();
-    if (!db.favorites.includes(body.nftId)) {
-      db.favorites.push(body.nftId);
+    const current = db.favoritesByUser[userId] ?? [];
+    if (!current.includes(body.nftId)) {
+      db.favoritesByUser[userId] = [...current, body.nftId];
       persistDb();
     }
-    return HttpResponse.json({ nftIds: db.favorites });
+    return HttpResponse.json({ nftIds: db.favoritesByUser[userId] ?? [] });
   }),
 
   // DELETE /api/favorites/:nftId
@@ -35,9 +38,12 @@ export const favoritesHandlers = [
     const failure = await applyScenario(request);
     if (failure) return failure;
 
+    const userId = resolveUserId(request);
     const db = getDb();
-    db.favorites = db.favorites.filter((id) => id !== String(params.nftId));
+    db.favoritesByUser[userId] = (db.favoritesByUser[userId] ?? []).filter(
+      (id) => id !== String(params.nftId),
+    );
     persistDb();
-    return HttpResponse.json({ nftIds: db.favorites });
+    return HttpResponse.json({ nftIds: db.favoritesByUser[userId] ?? [] });
   }),
 ];
