@@ -38,8 +38,10 @@ O Axios converte isso em `ApiError` (`status`, `code`, `message`, `details`); `s
 | `PATCH /api/profile/password` | Body `{ currentPassword, newPassword }`. | `400 VALIDATION_ERROR` (senha atual errada ou nova senha curta) |
 | `GET /api/wallets/primary` | Carteira principal do usuário logado, ou `null` se ainda não cadastrou. | `401 UNAUTHENTICATED` |
 | `PUT /api/wallets/primary` | Cria ou substitui a carteira principal. | `400 VALIDATION_ERROR` (endereço fora do formato `0x...`) |
+| `POST /api/orders` | Body `{ idempotencyKey, walletType, note? }`. Cria o pedido a partir do carrinho atual (recalcula o total no servidor, nunca confia no que o cliente mandaria) e esvazia o carrinho. Reenvio com a mesma `idempotencyKey` devolve o pedido já criado em vez de duplicar. | `400 EMPTY_CART`, `400 VALIDATION_ERROR` |
+| `GET /api/orders/:id` | Detalhe de um pedido do usuário logado. | `404 NOT_FOUND` |
 
-⏳ Cotação e pedidos.
+⏳ Cotação.
 
 **Favoritos e carrinho são isolados por usuário**: o handler lê o header `Authorization: Bearer <token>` (anexado automaticamente pelo interceptor de requisição do Axios, `src/lib/api.ts`), resolve o `userId` dono daquele token (`resolveUserId`, `src/mocks/utils.ts`) e usa isso como chave em `favoritesByUser`/`cartByUser`. Sem token válido, cai no "usuário" `guest` — por isso favoritos/carrinho continuam funcionando antes do login, só que anônimos. **Nenhuma query key do front-end precisou mudar** para isso funcionar: a isolação por usuário é inteiramente uma decisão da camada de rede (mock), confirmando a separação de camadas da seção 1.
 
@@ -55,6 +57,7 @@ Valores em ETH trafegam como **string decimal** (`"0.25"`) e os cálculos usam `
 - Mutations não repetem sozinhas (evita compra duplicada); a idempotência cobre o reenvio manual.
 - **Atualização otimista** (requisito do desafio): `useToggleFavorite` (`src/features/favorites/queries.ts`) e `useUpdateCartItemQty` (`src/features/cart/queries.ts`) mudam o cache antes da resposta chegar (`onMutate`), guardam o estado anterior, desfazem em `onError` se a chamada falhar, e sempre revalidam em `onSettled`.
 - **Troca de identidade** (login/logout/cadastro): `useLogin`, `useRegister` e `useLogout` (`src/features/auth/queries.ts`) chamam `queryClient.invalidateQueries()` **sem query key** — ou seja, invalidam o cache inteiro. Motivo: quando quem está logado muda, qualquer coisa que o cache guardava (favoritos, carrinho) pode pertencer à pessoa errada; jogar tudo fora é mais simples e mais seguro do que tentar invalidar seletivamente.
+- **Sem otimismo + idempotência** (requisito do desafio): `useCreateOrder` (`src/features/orders/queries.ts`) é uma mutation comum, sem `onMutate` — a tela só avança pra confirmação depois que o servidor responde de verdade que o pedido existe (dinheiro/propriedade não se "chuta antes"). A chave de idempotência (`crypto.randomUUID()`, gerada uma vez quando a tela de pagamento monta) vira o próprio `id` do pedido no servidor; um reenvio da mesma tentativa (duplo clique, retry de rede) encontra o pedido já existente em vez de criar outro.
 - ⏳ Invalidação por eventos de tempo real.
 
 ## 4. Sessão
@@ -72,6 +75,12 @@ Guardado no mesmo "banco" fake (`src/mocks/db.ts`, campo `cartByUser`, uma lista
 ## 5.1 Perfil e carteiras
 
 Perfil (`src/features/profile`) e carteira principal (`src/features/wallets`) seguem o mesmo molde das demais features. A novidade aqui é que o formulário **edita** um dado existente em vez de criar algo do zero: a rota (`loader` + `ensureQueryData`) garante que o dado já está no cache antes do componente montar, e o componente usa `useSuspenseQuery` + passa o resultado direto como `defaultValues` do `useForm` — sem `useEffect` pra "carregar depois". O formulário de senha é opcional dentro do mesmo "Salvar": só dispara `PATCH /profile/password` se os três campos de senha vierem preenchidos (validado com um `.refine()` do Zod que compara campos entre si).
+
+## 5.2 Pagamento e Confirmação de pedido
+
+O Figma repete o formulário inteiro de carteira (`Nome de exibição`, `Rede`, `Endereço`...) dentro do checkout — exatamente os mesmos campos já preenchidos em `/carteiras`. Em vez de duplicar esse formulário, o checkout (`/pagamento`) **reaproveita** o perfil e a carteira principal já salvos (mostrados como resumo, não como formulário de novo) — é o que um checkout de verdade faz (usa o método de pagamento já cadastrado). Sem carteira cadastrada, o botão "Confirmar compra" fica desabilitado e a tela convida a cadastrar uma em `/carteiras`.
+
+`/pagamento` também redireciona pra `/carrinho` se o carrinho estiver vazio (checado no `loader`, antes da tela montar). O pedido criado (`POST /orders`) leva para `/confirmacao/$orderId`, que segue o mesmo molde de `nfts.$id.tsx`: `loader` + `ensureQueryData` + `notFound()` se o pedido não existir ou não for do usuário logado.
 
 ## 6. Tempo real e reconciliação REST × Socket.IO ⏳
 
@@ -95,3 +104,5 @@ Perfil (`src/features/profile`) e carteira principal (`src/features/wallets`) se
 - **Login/Cadastro**: no Figma são um modal flutuando sobre a página de catálogo (com dois bugs visuais "congelados de propósito" no fundo, documentados pelo próprio arquivo Figma). Implementamos como páginas próprias (`/login`, `/cadastro`) com o mesmo cartão do modal, sem duplicar o catálogo de fundo — é só cenário decorativo no Figma, sem requisito funcional. "Esqueceu a senha?" e os botões "Continuar com Google/Facebook" são renderizados iguais ao Figma, mas não funcionais (não há backend de recuperação de senha nem OAuth social no desafio).
 - **Perfil**: upload de avatar é só visual ("Alterar"/"Remover" não têm ação) — não há backend de upload de arquivo no desafio. O campo "Nome ENS" vira só um input com sufixo fixo `.eth` em vez do select de uma opção só do Figma (mesma informação, sem uma escolha que não existe de verdade).
 - **Carteiras**: só a "Carteira principal" é funcional (criar/editar). A seção "Carteira secundária" é renderizada igual ao Figma (texto "Você ainda não adicionou..." + link "Adicionar"), mas sem ação — gerenciar várias carteiras por conta está fora do escopo deste desafio. Os campos "Tipo de carteira" (MetaMask/WalletConnect/Coinbase) e "Código de indicação" são salvos como texto simples, sem nenhuma integração real com carteiras de blockchain (não existe conexão de carteira de verdade no desafio).
+- **Pagamento**: não repete o formulário de carteira (ver seção 5.2) — mostra o resumo do que já foi salvo em `/carteiras`. "Usar outra carteira?" (opção de pagar com uma carteira diferente da principal só nessa compra) e o footer completo da tela não são funcionais, mesmo padrão de deviation já adotado em outras telas. Sem backend de cotação em tempo real, a taxa de rede continua fixa (mesma de `/carrinho`).
+- **Confirmação de pedido**: no Figma é um modal sobre a página de pagamento; implementamos como página própria (`/confirmacao/:orderId`), mesmo padrão usado em login/cadastro. O botão "Ver no Etherscan" é só visual — não existe blockchain real nem Etherscan nesse mock.

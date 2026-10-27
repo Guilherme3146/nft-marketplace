@@ -14,7 +14,9 @@ import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as CarteirasRouteImport } from './routes/carteiras'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PagamentoRouteImport } from './routes/pagamento'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as ConfirmacaoOrderIdRouteImport } from './routes/confirmacao.$orderId'
 import { Route as NftsIdRouteImport } from './routes/nfts.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -42,9 +44,19 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PagamentoRoute = PagamentoRouteImport.update({
+  id: '/pagamento',
+  path: '/pagamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfirmacaoOrderIdRoute = ConfirmacaoOrderIdRouteImport.update({
+  id: '/confirmacao/$orderId',
+  path: '/confirmacao/$orderId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NftsIdRoute = NftsIdRouteImport.update({
@@ -59,7 +71,9 @@ export interface FileRoutesByFullPath {
   '/carrinho': typeof CarrinhoRoute
   '/carteiras': typeof CarteirasRoute
   '/login': typeof LoginRoute
+  '/pagamento': typeof PagamentoRoute
   '/perfil': typeof PerfilRoute
+  '/confirmacao/$orderId': typeof ConfirmacaoOrderIdRoute
   '/nfts/$id': typeof NftsIdRoute
 }
 export interface FileRoutesByTo {
@@ -68,7 +82,9 @@ export interface FileRoutesByTo {
   '/carrinho': typeof CarrinhoRoute
   '/carteiras': typeof CarteirasRoute
   '/login': typeof LoginRoute
+  '/pagamento': typeof PagamentoRoute
   '/perfil': typeof PerfilRoute
+  '/confirmacao/$orderId': typeof ConfirmacaoOrderIdRoute
   '/nfts/$id': typeof NftsIdRoute
 }
 export interface FileRoutesById {
@@ -78,7 +94,9 @@ export interface FileRoutesById {
   '/carrinho': typeof CarrinhoRoute
   '/carteiras': typeof CarteirasRoute
   '/login': typeof LoginRoute
+  '/pagamento': typeof PagamentoRoute
   '/perfil': typeof PerfilRoute
+  '/confirmacao/$orderId': typeof ConfirmacaoOrderIdRoute
   '/nfts/$id': typeof NftsIdRoute
 }
 export interface FileRouteTypes {
@@ -89,7 +107,9 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/carteiras'
     | '/login'
+    | '/pagamento'
     | '/perfil'
+    | '/confirmacao/$orderId'
     | '/nfts/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -98,7 +118,9 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/carteiras'
     | '/login'
+    | '/pagamento'
     | '/perfil'
+    | '/confirmacao/$orderId'
     | '/nfts/$id'
   id:
     | '__root__'
@@ -107,7 +129,9 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/carteiras'
     | '/login'
+    | '/pagamento'
     | '/perfil'
+    | '/confirmacao/$orderId'
     | '/nfts/$id'
   fileRoutesById: FileRoutesById
 }
@@ -117,7 +141,9 @@ export interface RootRouteChildren {
   CarrinhoRoute: typeof CarrinhoRoute
   CarteirasRoute: typeof CarteirasRoute
   LoginRoute: typeof LoginRoute
+  PagamentoRoute: typeof PagamentoRoute
   PerfilRoute: typeof PerfilRoute
+  ConfirmacaoOrderIdRoute: typeof ConfirmacaoOrderIdRoute
   NftsIdRoute: typeof NftsIdRoute
 }
 
@@ -158,11 +184,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pagamento': {
+      id: '/pagamento'
+      path: '/pagamento'
+      fullPath: '/pagamento'
+      preLoaderRoute: typeof PagamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/perfil': {
       id: '/perfil'
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confirmacao/$orderId': {
+      id: '/confirmacao/$orderId'
+      path: '/confirmacao/$orderId'
+      fullPath: '/confirmacao/$orderId'
+      preLoaderRoute: typeof ConfirmacaoOrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/nfts/$id': {
@@ -181,7 +221,9 @@ const rootRouteChildren: RootRouteChildren = {
   CarrinhoRoute: CarrinhoRoute,
   CarteirasRoute: CarteirasRoute,
   LoginRoute: LoginRoute,
+  PagamentoRoute: PagamentoRoute,
   PerfilRoute: PerfilRoute,
+  ConfirmacaoOrderIdRoute: ConfirmacaoOrderIdRoute,
   NftsIdRoute: NftsIdRoute,
 }
 export const routeTree = rootRouteImport

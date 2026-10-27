@@ -3,8 +3,8 @@ import { getDb, persistDb } from "../db";
 import { applyScenario } from "../scenarios";
 import { apiPath, errorResponse, resolveUserId } from "../utils";
 
-/** Junta cada linha do carrinho (só IDs + qty) com os dados reais do NFT/edição. */
-function resolveCartItems(userId: string) {
+/** Junta cada linha do carrinho (só IDs + qty) com os dados reais do NFT/edição. Reaproveitada pelo checkout. */
+export function resolveCartItems(userId: string) {
   const db = getDb();
   const records = db.cartByUser[userId] ?? [];
   return records.flatMap((record) => {

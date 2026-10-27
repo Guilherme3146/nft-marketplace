@@ -4,8 +4,8 @@ import { cartHandlers } from './cart'
 import { authHandlers } from './auth'
 import { profileHandlers } from './profile'
 import { walletsHandlers } from './wallets'
+import { ordersHandlers } from './orders'
 
-/** Cada módulo novo adiciona seus handlers aqui (pedidos...). */
 export const handlers = [
   ...nftHandlers,
   ...favoritesHandlers,
@@ -13,4 +13,5 @@ export const handlers = [
   ...authHandlers,
   ...profileHandlers,
   ...walletsHandlers,
+  ...ordersHandlers,
 ]

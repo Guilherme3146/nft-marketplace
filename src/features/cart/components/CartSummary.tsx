@@ -1,13 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import Decimal from "decimal.js";
+import { NETWORK_FEE_ETH } from "../constants";
 import type { CartLineItem } from "../types";
 
 interface CartSummaryProps {
   items: CartLineItem[];
 }
-
-/** Sem backend de cupom/rede real no desafio: taxa fixa, igual ao Figma. */
-const NETWORK_FEE_ETH = "0.016";
 
 export function CartSummary({ items }: CartSummaryProps) {
   const subtotal = items.reduce(
@@ -59,12 +57,12 @@ export function CartSummary({ items }: CartSummaryProps) {
       </div>
 
       <div className="flex flex-col items-start gap-3">
-        <button
-          type="button"
-          className="h-10 w-full rounded-sm bg-primary text-sm font-bold text-primary-foreground"
+        <Link
+          to="/pagamento"
+          className="flex h-10 w-full items-center justify-center rounded-sm bg-primary text-sm font-bold text-primary-foreground"
         >
           Conectar e finalizar
-        </button>
+        </Link>
         <Link to="/" className="text-sm text-accent">
           Continuar explorando
         </Link>
