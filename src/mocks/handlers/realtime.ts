@@ -4,10 +4,11 @@ import { getDb, persistDb } from "../db";
 
 const UPDATE_INTERVAL_MS = 4000;
 
-const realtimeChannel = ws.link("*/socket.io/*");
+const realtimeChannel = ws.link("*");
 
 export const realtimeHandlers = [
   realtimeChannel.addEventListener("connection", (connection) => {
+    console.log("[realtime] CONEXAO RECEBIDA", connection.client.url);
     const io = toSocketIo(connection);
 
     const interval = setInterval(() => {

@@ -3,7 +3,6 @@ import { createRouter, RouterProvider } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { queryClient } from '@/lib/query-client'
-import { socket } from '@/lib/socket'
 import { routeTree } from './routeTree.gen'
 import './index.css'
 
@@ -27,8 +26,6 @@ async function enableMocking() {
 }
 
 void enableMocking().then(() => {
-  socket.connect()
-
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>

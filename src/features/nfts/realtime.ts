@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { socket } from "@/lib/socket";
+import { getSocket } from "@/lib/socket";
 import { nftKeys } from "./queries";
 import type { Nft, NftListResponse, NftSummary } from "./types";
 
@@ -28,6 +28,9 @@ export function useRealtimeNftUpdates() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    let cancelled = false;
+    let activeSocket: Awaited<ReturnType<typeof getSocket>> | undefined;
+
     function handleUpdate(update: NftRealtimeUpdate) {
       queryClient.setQueriesData({ queryKey: nftKeys.all }, (data: unknown) => {
         if (!data) return data;
@@ -41,9 +44,15 @@ export function useRealtimeNftUpdates() {
       });
     }
 
-    socket.on("nft:update", handleUpdate);
+    void getSocket().then((socket) => {
+      if (cancelled) return;
+      activeSocket = socket;
+      socket.on("nft:update", handleUpdate);
+    });
+
     return () => {
-      socket.off("nft:update", handleUpdate);
+      cancelled = true;
+      activeSocket?.off("nft:update", handleUpdate);
     };
   }, [queryClient]);
 }
