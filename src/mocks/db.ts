@@ -22,7 +22,7 @@ export interface MockDb {
 
 export const GUEST_USER_ID = 'guest'
 
-const STORAGE_KEY = 'nft-marketplace:mock-db:v5'
+const STORAGE_KEY = 'nft-marketplace:mock-db:v6'
 
 const hasStorage = () => typeof localStorage !== 'undefined'
 

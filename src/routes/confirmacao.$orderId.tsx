@@ -46,16 +46,18 @@ function ConfirmacaoPage() {
   return (
     <div className="mx-auto flex w-full max-w-[578px] flex-col overflow-hidden rounded-lg bg-card">
       <div className="flex flex-col items-center gap-4 px-6 pt-12 text-center sm:px-12">
-        <div className="flex size-20 items-center justify-center rounded-full bg-surface-raised text-3xl">
-          🎉
-        </div>
+        <img src="/icons/thank-you.svg" alt="" aria-hidden="true" width={65} height={80} />
+
         <h1 className="text-xl font-bold text-foreground">Seus NFTs agora estão na sua carteira</h1>
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-y-3 divide-border border-y border-border px-4 py-4 text-center text-sm sm:grid-cols-4 sm:gap-y-0 sm:divide-x sm:px-8">
         <div>
           <p className="text-muted-foreground">ID da transação</p>
-          <p className="truncate font-medium text-foreground">{order.id.slice(0, 8)}…</p>
+          <p className="truncate font-medium text-foreground">
+            0x{order.id.replace(/-/g, "").slice(0, 4).toUpperCase()}…
+            {order.id.replace(/-/g, "").slice(-4).toUpperCase()}
+          </p>
         </div>
         <div>
           <p className="text-muted-foreground">Data</p>
@@ -73,6 +75,13 @@ function ConfirmacaoPage() {
 
       <div className="flex flex-col gap-3 px-4 py-6 sm:px-8">
         <h2 className="text-[15px] font-bold text-foreground">Detalhes da transação</h2>
+        <div className="flex items-center justify-between text-sm font-bold text-muted-foreground">
+          <span>NFTs</span>
+          <span className="flex gap-8">
+            <span>Edições</span>
+            <span>Subtotal</span>
+          </span>
+        </div>
         <ul className="flex flex-col gap-3">
           {order.items.map((item) => (
             <li key={`${item.nftId}-${item.editionId}`} className="flex items-center gap-3">

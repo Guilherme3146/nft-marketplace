@@ -52,9 +52,9 @@ const SOCIAL_ICONS = [
 export function Footer() {
   return (
     <footer className="mt-24 flex flex-col gap-px bg-card">
-      <div className="grid grid-cols-1 gap-8 p-8 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 divide-border bg-card p-8 sm:grid-cols-2 sm:gap-10 sm:divide-x lg:grid-cols-4">
         {MEDALLIONS.map((medallion) => (
-          <div key={medallion.letter} className="flex flex-col items-center gap-3 text-center">
+          <div key={medallion.letter} className="flex flex-col items-start gap-3 sm:pl-10">
             <div className="flex size-[74px] items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
               {medallion.letter}
             </div>
@@ -64,28 +64,28 @@ export function Footer() {
             </p>
           </div>
         ))}
-      </div>
 
-      <div className="flex flex-col gap-4 bg-surface-dark p-8 sm:items-center sm:text-center">
-        <h2 className="text-lg font-bold text-foreground">Antecipe-se ao próximo lançamento</h2>
-        <div className="flex w-full max-w-md gap-2">
-          <input
-            type="email"
-            disabled
-            placeholder="digite seu e-mail..."
-            className="h-10 flex-1 rounded-md border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground"
-          />
-          <button
-            type="button"
-            disabled
-            className="h-10 w-[85px] rounded-md bg-primary text-sm font-bold text-primary-foreground opacity-60"
-          >
-            Enviar
-          </button>
+        <div className="flex flex-col items-start gap-4 sm:pl-10">
+          <h2 className="text-lg font-bold text-foreground">Antecipe-se ao próximo lançamento</h2>
+          <div className="flex w-full gap-2">
+            <input
+              type="email"
+              disabled
+              placeholder="digite seu e-mail..."
+              className="h-10 min-w-0 flex-1 rounded-md border border-border bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground"
+            />
+            <button
+              type="button"
+              disabled
+              className="h-10 w-[85px] shrink-0 rounded-md bg-primary text-sm font-bold text-primary-foreground opacity-60"
+            >
+              Enviar
+            </button>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Receba lançamentos selecionados, histórias de criadores e novidades do mercado.
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Receba lançamentos selecionados, histórias de criadores e novidades do mercado.
-        </p>
       </div>
 
       <div className="flex flex-col flex-wrap items-center justify-between gap-6 bg-surface-dark p-8 text-center sm:flex-row sm:text-left">
@@ -103,7 +103,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-10 p-8 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-10 bg-card p-8 sm:grid-cols-2 lg:grid-cols-4">
         {LINK_COLUMNS.map((column) => (
           <div key={column.title} className="flex flex-col gap-2">
             <h3 className="text-lg font-bold text-foreground">{column.title}</h3>
@@ -114,20 +114,27 @@ export function Footer() {
             </ul>
           </div>
         ))}
-      </div>
 
-      <div className="flex flex-col items-center gap-4 p-8 sm:flex-row sm:justify-between">
-        <div className="flex items-center gap-2">
-          {SOCIAL_ICONS.map((icon) => (
-            <img key={icon} src={icon} alt="" aria-hidden="true" width={30} height={30} />
-          ))}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-bold text-foreground">Redes sociais</h3>
+            <div className="flex items-center gap-2">
+              {SOCIAL_ICONS.map((icon) => (
+                <img key={icon} src={icon} alt="" aria-hidden="true" width={30} height={30} />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-bold text-foreground">Carteiras compatíveis</h3>
+            <span className="flex h-[26px] w-fit items-center rounded-md border border-border-soft bg-surface-dark px-3 text-[9px] font-bold tracking-[0.1px] text-accent">
+              METAMASK • WALLETCONNECT • COINBASE
+            </span>
+          </div>
         </div>
-        <span className="flex h-[26px] items-center rounded-md border border-border bg-surface-dark px-3 text-[9px] font-bold tracking-[0.1px] text-accent">
-          METAMASK • WALLETCONNECT • COINBASE
-        </span>
       </div>
 
-      <p className="py-6 text-center text-sm text-muted-foreground">
+      <p className="bg-card py-6 text-center text-sm text-muted-foreground">
         © {CURRENT_YEAR} Kurio. Propriedade digital para todos.
       </p>
     </footer>

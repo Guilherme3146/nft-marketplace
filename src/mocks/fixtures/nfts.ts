@@ -18,9 +18,15 @@ const COLLECTIONS = ['Aurora Drift', 'Pixel Orchard', 'Hollow Moons', 'Static Bl
 const CREATORS = ['Marina Costa', 'Theo Park', 'Ayumi Sato', 'Lucas Brandt', 'Nadia Rahman', 'Iris Vega', 'Caio Mendes', 'Elsa Berg']
 const CATEGORIES: NftCategory[] = ['art', 'music', 'photography', 'gaming', 'collectibles']
 const EDITION_TEMPLATES = [
-  { id: 'standard', label: 'Standard', multiplier: '1', total: 100 },
-  { id: 'limited', label: 'Limited', multiplier: '1.5', total: 25 },
-  { id: 'genesis', label: 'Genesis', multiplier: '3', total: 5 },
+  { id: 'standard', multiplier: '1', total: 100 },
+  { id: 'limited', multiplier: '1.5', total: 25 },
+  { id: 'genesis', multiplier: '3', total: 5 },
+]
+
+const ATTRIBUTE_POOL = [
+  'Óculos', 'Esmeralda', 'Raro', 'Dourado', 'Holográfico', 'Brilho',
+  'Edição limitada', 'Fundo gradiente', 'Textura fosca', 'Contorno duplo',
+  'Metálico', 'Vibrante',
 ]
 
 const ARTWORKS = [
@@ -49,11 +55,16 @@ function buildNft(index: number): Nft {
     const editionSoldOut = soldOut || (template.id === 'genesis' && number % 7 === 0)
     return {
       id: template.id,
-      label: template.label,
+      label: `1/${template.total}`,
       priceEth: basePrice.times(template.multiplier).toDecimalPlaces(3).toFixed(),
       available: editionSoldOut ? 0 : drawn,
       total: template.total,
     }
+  })
+
+  const attributes = Array.from({ length: 3 }, (_, i) => {
+    const poolIndex = (index * 7 + i * 5) % ATTRIBUTE_POOL.length
+    return ATTRIBUTE_POOL[poolIndex]
   })
 
   const name = `${ADJECTIVES[index % ADJECTIVES.length]} ${NOUNS[(index * 5 + 3) % NOUNS.length]} #${String(number).padStart(2, '0')}`
@@ -75,6 +86,7 @@ function buildNft(index: number): Nft {
     description: `${name} faz parte da coleção ${collection}, criada por ${creatorName}. Uma peça de ${category} em edição limitada, com autenticidade registrada na rede.`,
     images,
     editions,
+    attributes,
     createdAt: new Date(Date.UTC(2026, 0, 1) + index * 36 * 3_600_000).toISOString(),
   }
   recomputeDerived(nft)

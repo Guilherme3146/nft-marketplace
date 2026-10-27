@@ -2,15 +2,17 @@ import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import Decimal from "decimal.js";
-import { Heart } from "lucide-react";
+import { Heart, Mail, Star } from "lucide-react";
 import { nftDetailQueryOptions } from "@/features/nfts/queries";
 import { useFavorites, useToggleFavorite } from "@/features/favorites/queries";
 import { useAddToCart } from "@/features/cart/queries";
 import { isApiError } from "@/lib/api";
 import { CATEGORY_LABELS } from "@/features/nfts/category-labels";
+import { getReviewCount } from "@/features/nfts/review-data";
 import { NftGallery } from "@/features/nfts/components/NftGallery";
 import { NftEditionPicker } from "@/features/nfts/components/NftEditionPicker";
 import { NftQuantityStepper } from "@/features/nfts/components/NftQuantityStepper";
+import { NftDetailTabs } from "@/features/nfts/components/NftDetailTabs";
 import { NftRelated } from "@/features/nfts/components/NftRelated";
 
 export const Route = createFileRoute("/nfts/$id")({
@@ -83,9 +85,17 @@ function NftDetailPage() {
 
           <div className="flex flex-1 flex-col gap-4">
             <h1 className="text-[28px] font-bold text-foreground">{nft.name}</h1>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <p className="text-xl font-bold text-accent">{nft.priceEth} ETH</p>
-              <span className="text-sm text-muted-foreground">{nft.likes} curtidas</span>
+              <span className="flex items-center gap-1 text-accent">
+                {Array.from({ length: 5 }, (_, i) => (
+                  <Star key={i} className="size-4" fill="currentColor" />
+                ))}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                {getReviewCount(nft.id)} avaliações de colecionadores
+              </span>
+              <span className="text-sm text-muted-foreground">· {nft.likes} curtidas</span>
             </div>
 
             <hr className="border-border" />
@@ -145,9 +155,24 @@ function NftDetailPage() {
                 <dt className="inline font-medium">Categoria: </dt>
                 <dd className="inline">{CATEGORY_LABELS[nft.category]}</dd>
               </div>
+              <div>
+                <dt className="inline font-medium">Atributos: </dt>
+                <dd className="inline">{nft.attributes.join(", ")}</dd>
+              </div>
             </dl>
+
+            <div className="flex items-center gap-3 text-[15px] text-foreground">
+              <span className="font-bold">Compartilhar este NFT:</span>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <img src="/footer/social-3.svg" alt="" aria-hidden="true" className="size-6" />
+                <img src="/footer/social-4.svg" alt="" aria-hidden="true" className="size-6" />
+                <Mail className="size-6" aria-hidden="true" />
+              </div>
+            </div>
           </div>
         </div>
+
+        <NftDetailTabs nft={nft} editionLabel={selectedEdition?.label ?? nft.editions[0]?.label ?? ""} />
       </div>
 
       <NftRelated collection={nft.collection} excludeId={nft.id} />

@@ -31,6 +31,7 @@ export interface Nft extends NftSummary {
   description: string
   images: string[]
   editions: NftEdition[]
+  attributes: string[]
   createdAt: string
 }
 
