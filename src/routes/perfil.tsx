@@ -102,13 +102,13 @@ function PerfilPage() {
   const isSaving = updateProfile.isPending || changePassword.isPending;
 
   return (
-    <div className="flex items-start gap-7">
+    <div className="flex flex-col items-start gap-7 lg:flex-row">
       <AccountSidebar active="perfil" />
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-1 flex-col gap-8">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex w-full flex-1 flex-col gap-8">
         <h1 className="text-base font-bold text-foreground">Perfil do colecionador</h1>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <AccountFormField label="Nome de exibição" error={errors.displayName?.message}>
             <input {...register("displayName")} className={accountInputClass} />
           </AccountFormField>
@@ -143,7 +143,7 @@ function PerfilPage() {
 
         <div className="flex flex-col gap-6">
           <h2 className="text-base font-medium text-foreground">Alterar senha</h2>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <AccountFormField label="Senha atual" required={false} error={errors.currentPassword?.message}>
               <input {...register("currentPassword")} type="password" className={accountInputClass} />
             </AccountFormField>

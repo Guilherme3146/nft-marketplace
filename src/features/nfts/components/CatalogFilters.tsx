@@ -35,7 +35,7 @@ export function CatalogFilters({
   const [range, setRange] = useState<number[]>([PRICE_MIN, PRICE_MAX]);
 
   return (
-    <div className="flex w-[310px] shrink-0 flex-col gap-10 rounded-xl bg-card p-5">
+    <div className="flex w-full flex-col gap-10 rounded-xl bg-card p-5 lg:w-[310px] lg:shrink-0">
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-bold text-foreground">Coleções</h2>
         <ul className="flex flex-col gap-1 px-3">

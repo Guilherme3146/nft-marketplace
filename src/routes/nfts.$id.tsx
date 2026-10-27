@@ -81,7 +81,7 @@ function NftDetailPage() {
           <Link to="/">Início</Link> / {CATEGORY_LABELS[nft.category]}
         </nav>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col gap-8 md:flex-row">
           <NftGallery images={nft.images} productName={nft.name} />
 
           <div className="flex flex-1 flex-col gap-4">
@@ -164,9 +164,9 @@ function NftDetailSkeleton() {
     <div
       role="status"
       aria-label="Carregando NFT"
-      className="flex gap-8 motion-safe:animate-pulse"
+      className="flex flex-col gap-8 motion-safe:animate-pulse md:flex-row"
     >
-      <div className="size-[444px] rounded-md bg-card" />
+      <div className="aspect-square w-full rounded-md bg-card md:size-[444px]" />
       <div className="flex flex-1 flex-col gap-4">
         <div className="h-8 w-2/3 rounded bg-card" />
         <div className="h-6 w-1/4 rounded bg-card" />

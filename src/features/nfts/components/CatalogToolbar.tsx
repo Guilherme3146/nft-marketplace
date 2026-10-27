@@ -29,8 +29,8 @@ export function CatalogToolbar({ sort, onChangeSort }: CatalogToolbarProps) {
   const isPopular = sort === "popular";
 
   return (
-    <div className="flex items-center justify-between border-b border-border pb-3">
-      <div className="flex gap-5 text-[15px] font-medium">
+    <div className="flex flex-col items-start gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap gap-5 text-[15px] font-medium">
         <button
           type="button"
           onClick={() => onChangeSort("recent")}

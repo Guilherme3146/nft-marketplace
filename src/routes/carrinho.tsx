@@ -29,9 +29,10 @@ function CartPage() {
           </Link>
         </section>
       ) : (
-        <div className="flex items-start gap-8">
-          <div className="flex flex-1 flex-col gap-3">
-            <div className="grid grid-cols-[250px_77px_75px_87px_24px] gap-3 px-3 text-sm font-bold text-muted-foreground">
+        <div className="flex flex-col items-start gap-8 lg:flex-row">
+          <div className="flex w-full flex-1 flex-col gap-3">
+            {/* Cabeçalho de colunas só faz sentido na tabela de desktop. */}
+            <div className="hidden grid-cols-[250px_77px_75px_87px_24px] gap-3 px-3 text-sm font-bold text-muted-foreground md:grid">
               <span>NFTs</span>
               <span>Preço</span>
               <span>Edições</span>

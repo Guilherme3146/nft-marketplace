@@ -83,12 +83,12 @@ function PagamentoPage() {
         <Link to="/">Início</Link> / Mercado / Pagamento
       </nav>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex items-start gap-8">
-        <div className="flex flex-1 flex-col gap-6">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col items-start gap-8 lg:flex-row">
+        <div className="flex w-full flex-1 flex-col gap-6">
           <h1 className="text-base font-bold text-foreground">Perfil do colecionador</h1>
 
           {wallet ? (
-            <dl className="grid grid-cols-2 gap-4 rounded-xl bg-card p-5 text-[15px]">
+            <dl className="grid grid-cols-1 gap-4 rounded-xl bg-card p-5 text-[15px] sm:grid-cols-2">
               <div>
                 <dt className="text-secondary">Nome de exibição</dt>
                 <dd className="text-foreground">{wallet.displayName}</dd>
@@ -128,7 +128,7 @@ function PagamentoPage() {
           </div>
         </div>
 
-        <div className="flex w-[405px] shrink-0 flex-col gap-6 rounded-xl bg-card p-5">
+        <div className="flex w-full flex-col gap-6 rounded-xl bg-card p-5 lg:w-[405px] lg:shrink-0">
           <h2 className="text-lg font-bold text-foreground">Seus NFTs</h2>
 
           <ul className="flex flex-col gap-3">

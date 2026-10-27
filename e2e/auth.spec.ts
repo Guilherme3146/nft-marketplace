@@ -11,7 +11,11 @@ test.describe('Conta e sessão', () => {
     await page.locator('input[placeholder="Confirmar senha"]').fill('mock1234')
     await page.getByRole('button', { name: 'Criar conta' }).click()
 
-    await expect(page.getByRole('link', { name: 'Olá, Teste E2E' })).toBeVisible()
+    // No mobile o header mostra só um ícone (sem o nome) — checamos o perfil direto,
+    // que funciona em qualquer tamanho de tela.
+    await page.getByRole('button', { name: 'Sair' }).waitFor()
+    await page.goto('/perfil')
+    await expect(page.getByLabel('Nome de exibição')).toHaveValue('Teste E2E')
   })
 
   test('login com senha errada mostra mensagem de erro e não navega', async ({ page }) => {
@@ -27,8 +31,6 @@ test.describe('Conta e sessão', () => {
 
   test('logout volta a mostrar o link "Entrar" no header', async ({ page }) => {
     await login(page)
-    await expect(page.getByRole('link', { name: 'Olá, Ana Collector' })).toBeVisible()
-
     await page.getByRole('button', { name: 'Sair' }).click()
     await expect(page.getByRole('link', { name: 'Entrar' })).toBeVisible()
   })
@@ -48,8 +50,12 @@ test.describe('Conta e sessão', () => {
     await page.goto('/perfil')
 
     await page.getByLabel('Nome de exibição').fill('Ana Atualizada')
-    await page.getByRole('button', { name: 'Salvar' }).click()
+    await Promise.all([
+      page.waitForResponse((res) => res.url().includes('/profile') && res.request().method() === 'PATCH'),
+      page.getByRole('button', { name: 'Salvar' }).click(),
+    ])
 
-    await expect(page.getByRole('link', { name: 'Olá, Ana Atualizada' })).toBeVisible()
+    await page.reload()
+    await expect(page.getByLabel('Nome de exibição')).toHaveValue('Ana Atualizada')
   })
 })

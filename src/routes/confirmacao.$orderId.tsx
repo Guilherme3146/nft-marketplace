@@ -44,15 +44,15 @@ function ConfirmacaoPage() {
   });
 
   return (
-    <div className="mx-auto flex w-[578px] flex-col overflow-hidden rounded-lg bg-card">
-      <div className="flex flex-col items-center gap-4 px-12 pt-12 text-center">
+    <div className="mx-auto flex w-full max-w-[578px] flex-col overflow-hidden rounded-lg bg-card">
+      <div className="flex flex-col items-center gap-4 px-6 pt-12 text-center sm:px-12">
         <div className="flex size-20 items-center justify-center rounded-full bg-surface-raised text-3xl">
           🎉
         </div>
         <h1 className="text-xl font-bold text-foreground">Seus NFTs agora estão na sua carteira</h1>
       </div>
 
-      <div className="mt-8 grid grid-cols-4 divide-x divide-border border-y border-border px-8 py-4 text-center text-sm">
+      <div className="mt-8 grid grid-cols-2 gap-y-3 divide-border border-y border-border px-4 py-4 text-center text-sm sm:grid-cols-4 sm:gap-y-0 sm:divide-x sm:px-8">
         <div>
           <p className="text-secondary">ID da transação</p>
           <p className="truncate font-medium text-foreground">{order.id.slice(0, 8)}…</p>
@@ -71,7 +71,7 @@ function ConfirmacaoPage() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 px-8 py-6">
+      <div className="flex flex-col gap-3 px-4 py-6 sm:px-8">
         <h2 className="text-[15px] font-bold text-foreground">Detalhes da transação</h2>
         <ul className="flex flex-col gap-3">
           {order.items.map((item) => (
@@ -112,7 +112,7 @@ function ConfirmacaoPage() {
         ) : null}
       </div>
 
-      <div className="flex flex-col items-center gap-4 px-8 pb-8">
+      <div className="flex flex-col items-center gap-4 px-4 pb-8 sm:px-8">
         <p className="text-center text-sm text-muted-foreground">
           Transação confirmada na Ethereum. A propriedade foi transferida para sua carteira
           conectada e registrada na rede.

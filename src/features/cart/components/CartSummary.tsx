@@ -15,7 +15,7 @@ export function CartSummary({ items }: CartSummaryProps) {
   const total = subtotal.plus(NETWORK_FEE_ETH);
 
   return (
-    <aside className="flex w-[332px] shrink-0 flex-col gap-6 rounded-xl bg-card p-5">
+    <aside className="flex w-full flex-col gap-6 rounded-xl bg-card p-5 lg:w-[332px] lg:shrink-0">
       <h2 className="text-lg font-bold text-foreground">Resumo da carteira</h2>
 
       <div className="flex h-10 overflow-hidden rounded-sm border border-primary">

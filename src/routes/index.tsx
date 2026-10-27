@@ -114,8 +114,8 @@ function HomePage() {
         />
       </div>
 
-      <div className="mt-8 flex items-start gap-12">
-        <div className="flex flex-col gap-6">
+      <div className="mt-8 flex flex-col items-start gap-8 lg:flex-row lg:gap-12">
+        <div className="flex w-full flex-col gap-6 lg:w-auto">
           <CatalogFilters
             facets={query.data?.facets}
             selectedCategories={category ?? []}
@@ -126,7 +126,7 @@ function HomePage() {
           />
           <CatalogFeatured />
         </div>
-        <div className="flex-1">
+        <div className="w-full flex-1">
           <CatalogToolbar sort={sort} onChangeSort={(nextSort) => setFilter({ sort: nextSort })} />
 
           {query.isPending ? (

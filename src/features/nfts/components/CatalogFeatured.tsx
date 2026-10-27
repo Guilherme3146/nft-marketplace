@@ -14,7 +14,7 @@ export function CatalogFeatured() {
   const nft = query.data?.items[0];
 
   return (
-    <div className="flex w-[310px] shrink-0 flex-col items-center gap-4 rounded-xl bg-gradient-to-b from-primary/10 to-primary/[0.03] px-5 pt-6 pb-1">
+    <div className="flex w-full flex-col items-center gap-4 rounded-xl bg-gradient-to-b from-primary/10 to-primary/[0.03] px-5 pt-6 pb-1 lg:w-[310px] lg:shrink-0">
       <div className="flex flex-col items-center gap-2 text-center">
         <p className="text-2xl font-bold text-accent">NFT EM DESTAQUE</p>
         <p className="text-xl font-bold text-foreground">OFERTA LIMITADA</p>

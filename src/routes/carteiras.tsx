@@ -78,10 +78,10 @@ function CarteirasPage() {
   }
 
   return (
-    <div className="flex items-start gap-7">
+    <div className="flex flex-col items-start gap-7 lg:flex-row">
       <AccountSidebar active="carteiras" />
 
-      <div className="flex flex-1 flex-col gap-8">
+      <div className="flex w-full flex-1 flex-col gap-8">
         <div>
           <h1 className="text-[17px] font-bold text-foreground">Carteira principal</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -90,7 +90,7 @@ function CarteirasPage() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <AccountFormField label="Nome de exibição" error={errors.displayName?.message}>
               <input {...register("displayName")} className={accountInputClass} />
             </AccountFormField>

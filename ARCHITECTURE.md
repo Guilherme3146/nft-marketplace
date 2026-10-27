@@ -103,11 +103,17 @@ No navegador, `src/lib/socket.ts` é o único socket da aplicação (mesma ideia
 
 `e2e/` cobre os fluxos principais: catálogo (busca, filtro, paginação, estado vazio), Detalhe do NFT (favoritar, 404), carrinho/checkout (adicionar, alterar quantidade, remover, fluxo completo de compra ponta a ponta), conta/sessão (cadastro, login com erro, logout, rotas protegidas, edição de perfil) e cenários de rede simulados (`?scenario=slow/empty/server-error`). Roda contra o **build de produção** (`vite preview`), não o servidor de desenvolvimento — pega problema que só aparece com os assets finais.
 
-**Projeto `desktop` (1440×900): 23/23 passando.**
+**Projetos `desktop` (1440×900) e `mobile` (390×844): 46/46 passando.** A primeira rodada do `mobile` expôs que o catálogo e o header não tinham nenhum breakpoint responsivo (sidebar sobrepondo o grid, cliques bloqueados) — ver seção 8 para o que foi corrigido.
 
-**Projeto `mobile` (390×844): falhas conhecidas, não são bug do teste.** A suíte expôs que o layout do catálogo (sidebar de filtros + grid, lado a lado) e o header não têm nenhum breakpoint responsivo — em telas estreitas a sidebar fica sobreposta ao grid e bloqueia cliques de verdade. Isso confirma a limitação já documentada ("revisão de acessibilidade/responsivo" pendente) com uma evidência reproduzível, em vez de só uma suspeita.
+## 8. Decisões de UX — responsivo
 
-## 8. Decisões de UX ⏳
+Padrão adotado em todas as telas: **mobile-first**. Qualquer layout de duas colunas (sidebar de filtros, galeria+info do NFT, lista do carrinho+resumo, sidebar de conta+formulário, checkout) nasce empilhado (`flex-col`) e só vira lado a lado a partir de um breakpoint (`md:flex-row` ou `lg:flex-row`, dependendo de quanto conteúdo precisa de espaço). Larguras fixas em pixel (`w-[310px]`, `w-[500px]`...) viraram `w-full` com a largura fixa restrita ao breakpoint maior (`lg:w-[310px] lg:shrink-0`).
+
+- **Header**: abaixo de `md` (768px), o menu (Início/Mercado/Criadores/Aprenda) some — não cabe sem quebrar, e o catálogo continua alcançável pelo logo "KURIO". O "Olá, Nome" vira só um ícone de usuário; o texto continua existindo pra leitor de tela via um `<span>` com `sr-only` só visível nesse breakpoint (técnica importante: nunca usar `aria-label` fixo num elemento cujo conteúdo visível muda por breakpoint — isso faz o nome acessível ficar errado num dos dois tamanhos).
+- **Carrinho**: a linha de item usa `md:contents` — abaixo de `md` vira um cartão empilhado (duas linhas: imagem+nome, depois preço/quantidade/total/remover); a partir de `md`, o mesmo HTML "devolve" os filhos pro grid de 5 colunas do `<li>` pai, sem precisar de dois componentes diferentes.
+- **Detalhe do NFT**: a galeria de miniaturas rola na horizontal abaixo de `md` em vez de empilhar na vertical ao lado da imagem principal.
+
+Encontrado e corrigido durante este módulo (via Playwright, projeto `mobile`): o `useEffect` de debounce da busca do catálogo resetava a página pra 1 em toda montagem, mesmo sem o usuário mexer na busca — ver seção 7.1.
 
 ## 9. Limitações e desvios do Figma
 

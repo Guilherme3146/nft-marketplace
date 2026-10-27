@@ -14,8 +14,8 @@ interface AuthCardProps {
  */
 export function AuthCard({ active, subtitle, children }: AuthCardProps) {
   return (
-    <div className="mx-auto flex w-[500px] flex-col overflow-hidden rounded-lg bg-card">
-      <div className="flex flex-col gap-6 px-20 pt-12">
+    <div className="mx-auto flex w-full max-w-[500px] flex-col overflow-hidden rounded-lg bg-card">
+      <div className="flex flex-col gap-6 px-6 pt-12 sm:px-20">
         <div className="flex items-center gap-4 text-xl font-medium">
           <Link
             to="/login"
@@ -34,9 +34,9 @@ export function AuthCard({ active, subtitle, children }: AuthCardProps) {
         <p className="text-center text-[13px] text-muted-foreground">{subtitle}</p>
       </div>
 
-      <div className="flex flex-col gap-3 px-20 pt-6">{children}</div>
+      <div className="flex flex-col gap-3 px-6 pt-6 sm:px-20">{children}</div>
 
-      <div className="flex flex-col gap-3 px-20 pb-8 pt-6">
+      <div className="flex flex-col gap-3 px-6 pb-8 pt-6 sm:px-20">
         <div className="flex items-center gap-3 text-[13px] text-muted-foreground">
           <hr className="flex-1 border-border" />
           Ou continue com

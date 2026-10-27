@@ -9,8 +9,8 @@ export function NftGallery({ images, productName }: NftGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <div className="flex gap-4">
-      <div className="flex flex-col gap-4">
+    <div className="flex w-full flex-col gap-4 md:w-auto md:flex-row">
+      <div className="flex gap-4 overflow-x-auto md:flex-col">
         {images.map((image, index) => (
           <button
             key={image + index}
@@ -20,8 +20,8 @@ export function NftGallery({ images, productName }: NftGalleryProps) {
             aria-pressed={index === activeIndex}
             className={
               index === activeIndex
-                ? "size-[100px] overflow-hidden rounded-lg border border-primary"
-                : "size-[100px] overflow-hidden rounded-lg border border-transparent"
+                ? "size-[70px] shrink-0 overflow-hidden rounded-lg border border-primary md:size-[100px]"
+                : "size-[70px] shrink-0 overflow-hidden rounded-lg border border-transparent md:size-[100px]"
             }
           >
             <img
@@ -36,13 +36,13 @@ export function NftGallery({ images, productName }: NftGalleryProps) {
         ))}
       </div>
 
-      <div className="flex size-[444px] items-center justify-center rounded-md bg-card p-4">
+      <div className="flex aspect-square w-full items-center justify-center rounded-md bg-card p-4 md:size-[444px]">
         <img
           src={images[activeIndex]}
           alt={`Arte do NFT ${productName}`}
           width={404}
           height={404}
-          className="size-[404px] rounded-3xl object-cover"
+          className="size-full rounded-3xl object-cover md:size-[404px]"
         />
       </div>
     </div>

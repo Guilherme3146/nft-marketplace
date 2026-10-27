@@ -20,7 +20,7 @@ export function AccountSidebar({ active }: AccountSidebarProps) {
   const logout = useLogout();
 
   return (
-    <aside className="flex w-[310px] shrink-0 flex-col gap-1 bg-card py-2">
+    <aside className="flex w-full flex-col gap-1 bg-card py-2 lg:w-[310px] lg:shrink-0">
       <h2 className="px-4 py-2 text-lg font-bold text-foreground">Meu perfil</h2>
 
       <Link
