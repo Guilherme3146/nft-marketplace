@@ -3,14 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import type { NftCategory, NftListResponse } from "../types";
-
-const CATEGORY_LABELS: Record<NftCategory, string> = {
-  art: "Arte digital",
-  photography: "Fotografia",
-  music: "Música",
-  gaming: "Jogos",
-  collectibles: "Colecionáveis",
-};
+import { CATEGORY_LABELS } from "../category-labels";
 
 /**
  * A API não devolve "rede" (network) — não existe esse campo no nosso

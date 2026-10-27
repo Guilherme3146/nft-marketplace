@@ -8,6 +8,7 @@ import { nftFixtures } from './fixtures/nfts'
  */
 export interface MockDb {
   nfts: Nft[]
+  favorites: string[]
 }
 
 const STORAGE_KEY = 'nft-marketplace:mock-db:v1'
@@ -15,7 +16,7 @@ const STORAGE_KEY = 'nft-marketplace:mock-db:v1'
 const hasStorage = () => typeof localStorage !== 'undefined'
 
 function seed(): MockDb {
-  return { nfts: structuredClone(nftFixtures) }
+  return { nfts: structuredClone(nftFixtures), favorites: [] }
 }
 
 function load(): MockDb {
