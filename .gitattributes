@@ -1,0 +1,4 @@
+# routeTree.gen.ts é regenerado pelo plugin do TanStack Router sempre em LF;
+# sem isso, o Git fica marcando ele como "modificado" só por causa da
+# normalização de quebra de linha do Windows (CRLF), mesmo sem mudar nada.
+src/routeTree.gen.ts text eol=lf
