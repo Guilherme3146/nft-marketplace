@@ -54,7 +54,8 @@ export function CatalogToolbar({ sort, onChangeSort }: CatalogToolbarProps) {
         <span>Ordenar por:</span>
         <Select value={sort} onValueChange={(value) => onChangeSort(value as NftSort)}>
           <SelectTrigger className="border-none bg-transparent px-0 text-foreground shadow-none">
-            <SelectValue />
+            {/* SelectValue não traduz o valor sozinho — sem isso, mostraria "price-asc" cru na tela. */}
+            <SelectValue>{(value: NftSort) => SORT_LABELS[value]}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {Object.entries(SORT_LABELS).map(([value, label]) => (
