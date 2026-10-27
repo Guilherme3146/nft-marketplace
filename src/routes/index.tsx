@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { NFT_CATEGORIES, NFT_SORTS } from "@/features/nfts/types";
 import { nftListQueryOptions } from "@/features/nfts/queries";
@@ -7,6 +7,9 @@ import { nftListQueryOptions } from "@/features/nfts/queries";
 import { NftCard } from "@/features/nfts/components/NftCard";
 
 import { CatalogFilters } from "@/features/nfts/components/CatalogFilters";
+import { CatalogFeatured } from "@/features/nfts/components/CatalogFeatured";
+import { CatalogToolbar } from "@/features/nfts/components/CatalogToolbar";
+import { CatalogPagination } from "@/features/nfts/components/CatalogPagination";
 import type { NftCategory } from "@/features/nfts/types";
 
 import { useEffect, useState } from "react";
@@ -108,15 +111,20 @@ function HomePage() {
       </div>
 
       <div className="mt-8 flex items-start gap-12">
-        <CatalogFilters
-          facets={query.data?.facets}
-          selectedCategories={category ?? []}
-          onToggleCategory={toggleCategory}
-          onApplyPriceRange={(minPrice, maxPrice) =>
-            setFilter({ minPrice, maxPrice })
-          }
-        />
+        <div className="flex flex-col gap-6">
+          <CatalogFilters
+            facets={query.data?.facets}
+            selectedCategories={category ?? []}
+            onToggleCategory={toggleCategory}
+            onApplyPriceRange={(minPrice, maxPrice) =>
+              setFilter({ minPrice, maxPrice })
+            }
+          />
+          <CatalogFeatured />
+        </div>
         <div className="flex-1">
+          <CatalogToolbar sort={sort} onChangeSort={(nextSort) => setFilter({ sort: nextSort })} />
+
           {query.isPending ? (
             <CatalogSkeleton />
           ) : query.isError ? (
@@ -151,30 +159,12 @@ function HomePage() {
                 ))}
               </ul>
 
-              <nav
-                aria-label="Paginação"
-                className="mt-8 flex items-center gap-4"
-              >
-                <Link
-                  to="/"
-                  search={{ page: page - 1 }}
-                  disabled={page <= 1}
-                  className="rounded border px-3 py-2 aria-disabled:opacity-40"
-                >
-                  Anterior
-                </Link>
-                <span>
-                  Página {query.data.page} de {query.data.totalPages}
-                </span>
-                <Link
-                  to="/"
-                  search={{ page: page + 1 }}
-                  disabled={page >= query.data.totalPages}
-                  className="rounded border px-3 py-2 aria-disabled:opacity-40"
-                >
-                  Próxima
-                </Link>
-              </nav>
+              <div className="mt-8 flex justify-end">
+                <CatalogPagination
+                  currentPage={query.data.page}
+                  totalPages={query.data.totalPages}
+                />
+              </div>
             </>
           )}
         </div>
