@@ -61,7 +61,9 @@ function RootLayout() {
 
             {session.data ? (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-foreground">Olá, {session.data.name}</span>
+                <Link to="/perfil" className="text-sm text-foreground hover:text-accent">
+                  Olá, {session.data.name}
+                </Link>
                 <button
                   type="button"
                   aria-label="Sair"

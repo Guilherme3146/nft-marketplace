@@ -1,4 +1,5 @@
 import type { Nft } from '@/features/nfts/types'
+import type { Wallet } from '@/features/wallets/types'
 import { nftFixtures } from './fixtures/nfts'
 import { userFixtures, type UserFixture } from './fixtures/users'
 
@@ -21,12 +22,14 @@ export interface MockDb {
   users: UserFixture[]
   /** token → userId. "Sessão" fake: só um mapa em memória, sem JWT de verdade. */
   sessions: Record<string, string>
+  /** Uma carteira principal por usuário (ou nenhuma ainda). */
+  walletsByUser: Record<string, Wallet | null>
 }
 
 export const GUEST_USER_ID = 'guest'
 
 /** Muda sempre que o formato do MockDb muda, pra dado salvo no formato antigo ser ignorado em vez de quebrar o app. */
-const STORAGE_KEY = 'nft-marketplace:mock-db:v2'
+const STORAGE_KEY = 'nft-marketplace:mock-db:v3'
 
 const hasStorage = () => typeof localStorage !== 'undefined'
 
@@ -37,6 +40,7 @@ function seed(): MockDb {
     cartByUser: {},
     users: structuredClone(userFixtures),
     sessions: {},
+    walletsByUser: {},
   }
 }
 

@@ -33,8 +33,13 @@ O Axios converte isso em `ApiError` (`status`, `code`, `message`, `details`); `s
 | `POST /api/auth/register` | Body `{ name, email, password }`. Resposta `{ user, token }`. | `400 VALIDATION_ERROR` (campos faltando ou e-mail já cadastrado) |
 | `POST /api/auth/logout` | Invalida o token enviado em `Authorization`. | — |
 | `GET /api/auth/me` | Usuário da sessão atual (a partir do token). | `401 UNAUTHENTICATED` |
+| `GET /api/profile` | Dados de perfil do usuário logado. | `401 UNAUTHENTICATED` |
+| `PATCH /api/profile` | Body `{ name, username, email, ensName, walletNickname }`. Atualiza o perfil. | `401 UNAUTHENTICATED` |
+| `PATCH /api/profile/password` | Body `{ currentPassword, newPassword }`. | `400 VALIDATION_ERROR` (senha atual errada ou nova senha curta) |
+| `GET /api/wallets/primary` | Carteira principal do usuário logado, ou `null` se ainda não cadastrou. | `401 UNAUTHENTICATED` |
+| `PUT /api/wallets/primary` | Cria ou substitui a carteira principal. | `400 VALIDATION_ERROR` (endereço fora do formato `0x...`) |
 
-⏳ Cotação, pedidos, perfil e carteiras.
+⏳ Cotação e pedidos.
 
 **Favoritos e carrinho são isolados por usuário**: o handler lê o header `Authorization: Bearer <token>` (anexado automaticamente pelo interceptor de requisição do Axios, `src/lib/api.ts`), resolve o `userId` dono daquele token (`resolveUserId`, `src/mocks/utils.ts`) e usa isso como chave em `favoritesByUser`/`cartByUser`. Sem token válido, cai no "usuário" `guest` — por isso favoritos/carrinho continuam funcionando antes do login, só que anônimos. **Nenhuma query key do front-end precisou mudar** para isso funcionar: a isolação por usuário é inteiramente uma decisão da camada de rede (mock), confirmando a separação de camadas da seção 1.
 
@@ -58,11 +63,15 @@ Valores em ETH trafegam como **string decimal** (`"0.25"`) e os cálculos usam `
 
 Dois usuários de demonstração (`src/mocks/fixtures/users.ts`): `ana@kurio.test` / `bruno@kurio.test`, senha `mock1234` para os dois (senha em texto puro — aceitável só porque é um mock de estudo).
 
-⏳ Proteção de rotas (perfil/carteiras exigirem login) entra junto com os módulos que as usam.
+**Proteção de rotas**: `/perfil` e `/carteiras` usam `beforeLoad` (`requireSession`, `src/features/auth/require-session.ts`) pra garantir que existe sessão válida antes da rota carregar — sem token, `redirect({ to: '/login' })` entra em ação antes do componente sequer montar, igual ao `notFound()` já usado no Detalhe do NFT, só que pra autenticação em vez de "recurso não existe".
 
 ## 5. Carrinho
 
 Guardado no mesmo "banco" fake (`src/mocks/db.ts`, campo `cartByUser`, uma lista por usuário), como uma lista magra de `{ nftId, editionId, qty }` — o handler (`src/mocks/handlers/cart.ts`) junta isso com os dados reais do NFT/edição a cada resposta, parecido com um JOIN de banco de dados de verdade.
+
+## 5.1 Perfil e carteiras
+
+Perfil (`src/features/profile`) e carteira principal (`src/features/wallets`) seguem o mesmo molde das demais features. A novidade aqui é que o formulário **edita** um dado existente em vez de criar algo do zero: a rota (`loader` + `ensureQueryData`) garante que o dado já está no cache antes do componente montar, e o componente usa `useSuspenseQuery` + passa o resultado direto como `defaultValues` do `useForm` — sem `useEffect` pra "carregar depois". O formulário de senha é opcional dentro do mesmo "Salvar": só dispara `PATCH /profile/password` se os três campos de senha vierem preenchidos (validado com um `.refine()` do Zod que compara campos entre si).
 
 ## 6. Tempo real e reconciliação REST × Socket.IO ⏳
 
@@ -84,3 +93,5 @@ Guardado no mesmo "banco" fake (`src/mocks/db.ts`, campo `cartByUser`, uma lista
 - **Carrinho**: sem o carrossel "Colecionadores também viram" e sem o footer completo do Figma — são seções decorativas/editoriais sem requisito funcional no README (footer global fica para o final do projeto). O input de "Código promocional" e o botão "Conectar e finalizar" são renderizados iguais ao Figma, mas não funcionais — não há backend de cupom nem de conexão de carteira/sessão neste módulo.
 - **Header global**: "Criadores" e "Aprenda" não têm tela correspondente no escopo deste desafio — ficam como texto sem link. O ícone de busca é decorativo (a busca de verdade já existe na própria página de catálogo). Usamos o ícone `LogIn` em vez do ícone de "logout" que o Figma usa no botão "Entrar" (decisão nossa — "logout" ao lado de um botão de login não faz sentido semântico). O badge do carrinho mostra a contagem real de itens (soma das quantidades), não o valor fixo "6" do Figma.
 - **Login/Cadastro**: no Figma são um modal flutuando sobre a página de catálogo (com dois bugs visuais "congelados de propósito" no fundo, documentados pelo próprio arquivo Figma). Implementamos como páginas próprias (`/login`, `/cadastro`) com o mesmo cartão do modal, sem duplicar o catálogo de fundo — é só cenário decorativo no Figma, sem requisito funcional. "Esqueceu a senha?" e os botões "Continuar com Google/Facebook" são renderizados iguais ao Figma, mas não funcionais (não há backend de recuperação de senha nem OAuth social no desafio).
+- **Perfil**: upload de avatar é só visual ("Alterar"/"Remover" não têm ação) — não há backend de upload de arquivo no desafio. O campo "Nome ENS" vira só um input com sufixo fixo `.eth` em vez do select de uma opção só do Figma (mesma informação, sem uma escolha que não existe de verdade).
+- **Carteiras**: só a "Carteira principal" é funcional (criar/editar). A seção "Carteira secundária" é renderizada igual ao Figma (texto "Você ainda não adicionou..." + link "Adicionar"), mas sem ação — gerenciar várias carteiras por conta está fora do escopo deste desafio. Os campos "Tipo de carteira" (MetaMask/WalletConnect/Coinbase) e "Código de indicação" são salvos como texto simples, sem nenhuma integração real com carteiras de blockchain (não existe conexão de carteira de verdade no desafio).

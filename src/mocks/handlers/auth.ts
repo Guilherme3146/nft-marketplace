@@ -56,6 +56,9 @@ export const authHandlers = [
       name: body.name,
       email: body.email,
       password: body.password,
+      username: body.email.split("@")[0],
+      ensName: body.email.split("@")[0],
+      walletNickname: "",
     };
     db.users.push(user);
     persistDb();
