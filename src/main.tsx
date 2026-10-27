@@ -3,6 +3,7 @@ import { createRouter, RouterProvider } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { queryClient } from '@/lib/query-client'
+import { socket } from '@/lib/socket'
 import { routeTree } from './routeTree.gen'
 import './index.css'
 
@@ -21,7 +22,7 @@ declare module '@tanstack/react-router' {
   }
 }
 
-/** A API simulada precisa estar pronta ANTES do primeiro render, senão a 1ª requisição foge dela. */
+/** A API simulada precisa estar pronta ANTES do primeiro render, senão a 1ª requisição (ou conexão de socket) foge dela. */
 async function enableMocking() {
   if (import.meta.env.VITE_ENABLE_MOCKS !== 'true') return
   const { startMocking } = await import('@/mocks/browser')
@@ -29,6 +30,8 @@ async function enableMocking() {
 }
 
 void enableMocking().then(() => {
+  socket.connect()
+
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
