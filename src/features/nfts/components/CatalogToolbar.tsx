@@ -32,7 +32,11 @@ export function CatalogToolbar({ sort, onChangeSort }: CatalogToolbarProps) {
         >
           Todos os NFTs
         </button>
-        <button type="button" onClick={() => onChangeSort("recent")} className="text-foreground">
+        <button
+          type="button"
+          onClick={() => onChangeSort("recent")}
+          className={isPopular ? "text-foreground" : "text-accent"}
+        >
           Novos lançamentos
         </button>
         <button

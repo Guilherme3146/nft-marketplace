@@ -117,7 +117,7 @@ Encontrado e corrigido durante este módulo (via Playwright, projeto `mobile`): 
 
 ## 9. Limitações e desvios do Figma
 
-- **Início**: sem carrossel no banner (estático) e sem as seções de blog ("Diário da Cunhagem") e newsletter — são conteúdo editorial, fora do escopo do README ("páginas editoriais... não fazem parte da entrega").
+- **Início**: o banner existe (estático, sem carrossel) com o botão "EXPLORAR" rolando até o catálogo (`#catalogo`). Sem as seções de blog ("Diário da Cunhagem") — conteúdo editorial, fora do escopo do README ("páginas editoriais... não fazem parte da entrega"). O footer existe em todas as telas (mesmo texto/estrutura do Figma), mas as colunas de links, os ícones sociais e o formulário de newsletter são decorativos — sem páginas de destino nem backend de e-mail no desafio.
 - **Filtro "Rede"** (Ethereum/Polygon/Solana): renderizado visualmente igual ao Figma, mas sem funcionalidade — o modelo de dado e a API não têm esse campo por NFT.
 - **Detalhe do NFT**: sem estrelas/avaliações de colecionadores e sem a aba "Avaliações" — não existem no modelo de dado nem são pedidos pelo README; sem ícones de compartilhamento (decorativo, sem requisito). Os chips de edição usam os nomes reais do nosso modelo (`Standard`/`Limited`/`Genesis`) em vez do texto do Figma (`1/1`/`1/10`/`1/50`), pelo mesmo motivo.
 - **Favoritos**: coração removido do card do catálogo (só existe no Detalhe) — bate com a tabela de telas do README e com o próprio Figma, que só mostra o coração como estado ilustrativo pontual, não em todo card.

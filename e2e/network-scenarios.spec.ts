@@ -16,8 +16,8 @@ test.describe('Cenários de rede simulados (?scenario=)', () => {
   test('scenario=server-error mostra o erro da API em vez de travar a tela', async ({ page }) => {
     await page.goto('/login?scenario=server-error')
 
-    await page.locator('input[type="email"]').fill('ana@kurio.test')
-    await page.locator('input[type="password"]').fill('mock1234')
+    await page.locator('main input[type="email"]').fill('ana@kurio.test')
+    await page.locator('main input[type="password"]').fill('mock1234')
     await page.getByRole('button', { name: 'Entrar' }).click()
 
     await expect(

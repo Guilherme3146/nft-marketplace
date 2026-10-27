@@ -6,6 +6,7 @@ import { nftListQueryOptions } from "@/features/nfts/queries";
 
 import { NftCard } from "@/features/nfts/components/NftCard";
 
+import { CatalogHero } from "@/features/nfts/components/CatalogHero";
 import { CatalogFilters } from "@/features/nfts/components/CatalogFilters";
 import { CatalogFeatured } from "@/features/nfts/components/CatalogFeatured";
 import { CatalogToolbar } from "@/features/nfts/components/CatalogToolbar";
@@ -84,88 +85,85 @@ function HomePage() {
   }, [searchInput, q]);
 
   return (
-    <section aria-labelledby="catalog-title">
-      <h1 id="catalog-title" className="text-3xl font-bold text-foreground">
-        NFT Marketplace
-      </h1>
-      <p className="mt-1 text-muted-foreground">
-        Esta lista vem da API simulada (MSW) via Axios + TanStack Query.
-      </p>
+    <>
+      <CatalogHero />
 
-      <div className="mt-6">
-        <label htmlFor="catalog-search" className="sr-only">
-          Buscar NFTs
-        </label>
-        <input
-          id="catalog-search"
-          type="search"
-          placeholder="Buscar por nome, coleção ou criador..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className="w-full max-w-md rounded border border-border bg-transparent px-3 py-2 text-foreground placeholder:text-muted-foreground"
-        />
-      </div>
-
-      <div className="mt-8 flex flex-col items-start gap-8 lg:flex-row lg:gap-12">
-        <div className="flex w-full flex-col gap-6 lg:w-auto">
-          <CatalogFilters
-            facets={query.data?.facets}
-            selectedCategories={category ?? []}
-            onToggleCategory={toggleCategory}
-            onApplyPriceRange={(minPrice, maxPrice) =>
-              setFilter({ minPrice, maxPrice })
-            }
+      <section aria-label="Catálogo de NFTs" id="catalogo" className="mt-12">
+        <div className="mt-6">
+          <label htmlFor="catalog-search" className="sr-only">
+            Buscar NFTs
+          </label>
+          <input
+            id="catalog-search"
+            type="search"
+            placeholder="Buscar por nome, coleção ou criador..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="w-full max-w-md rounded border border-border bg-transparent px-3 py-2 text-foreground placeholder:text-muted-foreground"
           />
-          <CatalogFeatured />
         </div>
-        <div className="w-full flex-1">
-          <CatalogToolbar sort={sort} onChangeSort={(nextSort) => setFilter({ sort: nextSort })} />
 
-          {query.isPending ? (
-            <CatalogSkeleton />
-          ) : query.isError ? (
-            <div
-              role="alert"
-              className="mt-6 rounded-lg border border-destructive/40 bg-destructive/10 p-4"
-            >
-              <p className="font-medium text-foreground">
-                Não foi possível carregar o catálogo.
-              </p>
-              <p className="text-sm text-muted-foreground">{query.error.message}</p>
-              <button
-                type="button"
-                onClick={() => void query.refetch()}
-                className="mt-3 rounded bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
-              >
-                Tentar de novo
-              </button>
-            </div>
-          ) : query.data.items.length === 0 ? (
-            <p className="mt-6 text-muted-foreground">Nenhum NFT encontrado.</p>
-          ) : (
-            <>
-              <ul
-                aria-busy={query.isFetching}
-                className={`mt-6 grid grid-cols-2 gap-4 transition-opacity md:grid-cols-3 lg:grid-cols-4 ${
-                  query.isPlaceholderData ? "opacity-60" : ""
-                }`}
-              >
-                {query.data.items.map((nft) => (
-                  <NftCard key={nft.id} nft={nft} />
-                ))}
-              </ul>
+        <div className="mt-8 flex flex-col items-start gap-8 lg:flex-row lg:gap-12">
+          <div className="flex w-full flex-col gap-6 lg:w-auto">
+            <CatalogFilters
+              facets={query.data?.facets}
+              selectedCategories={category ?? []}
+              onToggleCategory={toggleCategory}
+              onApplyPriceRange={(minPrice, maxPrice) =>
+                setFilter({ minPrice, maxPrice })
+              }
+            />
+            <CatalogFeatured />
+          </div>
+          <div className="w-full flex-1">
+            <CatalogToolbar sort={sort} onChangeSort={(nextSort) => setFilter({ sort: nextSort })} />
 
-              <div className="mt-8 flex justify-end">
-                <CatalogPagination
-                  currentPage={query.data.page}
-                  totalPages={query.data.totalPages}
-                />
+            {query.isPending ? (
+              <CatalogSkeleton />
+            ) : query.isError ? (
+              <div
+                role="alert"
+                className="mt-6 rounded-lg border border-destructive/40 bg-destructive/10 p-4"
+              >
+                <p className="font-medium text-foreground">
+                  Não foi possível carregar o catálogo.
+                </p>
+                <p className="text-sm text-muted-foreground">{query.error.message}</p>
+                <button
+                  type="button"
+                  onClick={() => void query.refetch()}
+                  className="mt-3 rounded bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
+                >
+                  Tentar de novo
+                </button>
               </div>
-            </>
-          )}
+            ) : query.data.items.length === 0 ? (
+              <p className="mt-6 text-muted-foreground">Nenhum NFT encontrado.</p>
+            ) : (
+              <>
+                <ul
+                  aria-busy={query.isFetching}
+                  className={`mt-6 grid grid-cols-2 gap-4 transition-opacity md:grid-cols-3 lg:grid-cols-4 ${
+                    query.isPlaceholderData ? "opacity-60" : ""
+                  }`}
+                >
+                  {query.data.items.map((nft) => (
+                    <NftCard key={nft.id} nft={nft} />
+                  ))}
+                </ul>
+
+                <div className="mt-8 flex justify-end">
+                  <CatalogPagination
+                    currentPage={query.data.page}
+                    totalPages={query.data.totalPages}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
 

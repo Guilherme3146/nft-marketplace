@@ -4,7 +4,7 @@ test.describe('Catálogo', () => {
   test('lista os NFTs servidos pela API simulada (MSW)', async ({ page }) => {
     await page.goto('/')
 
-    await expect(page.getByRole('heading', { level: 1, name: 'NFT Marketplace' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /SEJA DONO DO FUTURO/i })).toBeVisible()
     await expect(page.locator('ul[aria-busy] > li')).toHaveCount(12)
   })
 

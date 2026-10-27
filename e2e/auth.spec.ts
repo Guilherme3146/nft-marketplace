@@ -19,8 +19,8 @@ test.describe('Conta e sessão', () => {
   test('login com senha errada mostra mensagem de erro e não navega', async ({ page }) => {
     await page.goto('/login')
 
-    await page.locator('input[type="email"]').fill('ana@kurio.test')
-    await page.locator('input[type="password"]').fill('senha-errada')
+    await page.locator('main input[type="email"]').fill('ana@kurio.test')
+    await page.locator('main input[type="password"]').fill('senha-errada')
     await page.getByRole('button', { name: 'Entrar' }).click()
 
     await expect(page.getByText('E-mail ou senha incorretos.')).toBeVisible()

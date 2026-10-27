@@ -5,6 +5,7 @@ import { LogIn, LogOut, Search, ShoppingCart, User } from 'lucide-react'
 import { useCart } from '@/features/cart/queries'
 import { useLogout, useSession } from '@/features/auth/queries'
 import { useRealtimeNftUpdates } from '@/features/nfts/realtime'
+import { Footer } from '@/components/Footer'
 
 export interface RouterContext {
   queryClient: QueryClient
@@ -98,6 +99,7 @@ function RootLayout() {
       <main id="main" className="mx-auto max-w-7xl px-4 py-8">
         <Outlet />
       </main>
+      <Footer />
       <ReactQueryDevtools initialIsOpen={false} />
     </>
   )
