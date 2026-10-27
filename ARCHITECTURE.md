@@ -97,7 +97,15 @@ No navegador, `src/lib/socket.ts` é o único socket da aplicação (mesma ideia
 - Handlers em `src/mocks/handlers`; estado em `src/mocks/db.ts` (memória + `localStorage`); reset por `?mock-reset=1` ou `window.__mock.reset()`.
 - Cenários de rede configuráveis e reproduzíveis (`src/mocks/scenarios.ts`), descritos no README.
 - Fixtures determinísticas: mesma semente, mesmos dados.
-- ⏳ Transporte do Socket.IO sobre MSW e suas limitações.
+- Transporte do Socket.IO sobre MSW: `ws.link()` + `@mswjs/socket.io-binding` (ver seção 6).
+
+## 7.1 Testes E2E (Playwright)
+
+`e2e/` cobre os fluxos principais: catálogo (busca, filtro, paginação, estado vazio), Detalhe do NFT (favoritar, 404), carrinho/checkout (adicionar, alterar quantidade, remover, fluxo completo de compra ponta a ponta), conta/sessão (cadastro, login com erro, logout, rotas protegidas, edição de perfil) e cenários de rede simulados (`?scenario=slow/empty/server-error`). Roda contra o **build de produção** (`vite preview`), não o servidor de desenvolvimento — pega problema que só aparece com os assets finais.
+
+**Projeto `desktop` (1440×900): 23/23 passando.**
+
+**Projeto `mobile` (390×844): falhas conhecidas, não são bug do teste.** A suíte expôs que o layout do catálogo (sidebar de filtros + grid, lado a lado) e o header não têm nenhum breakpoint responsivo — em telas estreitas a sidebar fica sobreposta ao grid e bloqueia cliques de verdade. Isso confirma a limitação já documentada ("revisão de acessibilidade/responsivo" pendente) com uma evidência reproduzível, em vez de só uma suspeita.
 
 ## 8. Decisões de UX ⏳
 

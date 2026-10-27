@@ -81,18 +81,22 @@ function HomePage() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      setFilter({ q: searchInput || undefined });
+      const nextQ = searchInput || undefined;
+      // Sem isso, este efeito dispara em TODA montagem (mesmo sem digitar nada)
+      // e sempre reseta a página pra 1 — o que apagava, por exemplo, um link
+      // direto pra "/?page=2".
+      if (nextQ !== q) setFilter({ q: nextQ });
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [searchInput]);
+  }, [searchInput, q]);
 
   return (
     <section aria-labelledby="catalog-title">
-      <h1 id="catalog-title" className="text-3xl font-bold">
+      <h1 id="catalog-title" className="text-3xl font-bold text-foreground">
         NFT Marketplace
       </h1>
-      <p className="mt-1 text-neutral-600">
+      <p className="mt-1 text-muted-foreground">
         Esta lista vem da API simulada (MSW) via Axios + TanStack Query.
       </p>
 
@@ -106,7 +110,7 @@ function HomePage() {
           placeholder="Buscar por nome, coleção ou criador..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          className="w-full max-w-md rounded border border-neutral-300 px-3 py-2"
+          className="w-full max-w-md rounded border border-border bg-transparent px-3 py-2 text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
@@ -130,22 +134,22 @@ function HomePage() {
           ) : query.isError ? (
             <div
               role="alert"
-              className="mt-6 rounded-lg border border-red-300 bg-red-50 p-4"
+              className="mt-6 rounded-lg border border-destructive/40 bg-destructive/10 p-4"
             >
-              <p className="font-medium">
+              <p className="font-medium text-foreground">
                 Não foi possível carregar o catálogo.
               </p>
-              <p className="text-sm text-neutral-700">{query.error.message}</p>
+              <p className="text-sm text-muted-foreground">{query.error.message}</p>
               <button
                 type="button"
                 onClick={() => void query.refetch()}
-                className="mt-3 rounded bg-neutral-900 px-3 py-2 text-sm text-white"
+                className="mt-3 rounded bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
               >
                 Tentar de novo
               </button>
             </div>
           ) : query.data.items.length === 0 ? (
-            <p className="mt-6">Nenhum NFT encontrado.</p>
+            <p className="mt-6 text-muted-foreground">Nenhum NFT encontrado.</p>
           ) : (
             <>
               <ul
@@ -183,11 +187,11 @@ function CatalogSkeleton() {
       {Array.from({ length: PAGE_SIZE }, (_, index) => (
         <li
           key={index}
-          className="animate-pulse rounded-lg border border-neutral-200 p-3"
+          className="animate-pulse rounded-lg border border-border p-3"
         >
-          <div className="aspect-square w-full rounded-md bg-neutral-200" />
-          <div className="mt-3 h-4 w-3/4 rounded bg-neutral-200" />
-          <div className="mt-2 h-3 w-1/2 rounded bg-neutral-200" />
+          <div className="aspect-square w-full rounded-md bg-card" />
+          <div className="mt-3 h-4 w-3/4 rounded bg-card" />
+          <div className="mt-2 h-3 w-1/2 rounded bg-card" />
         </li>
       ))}
     </ul>
