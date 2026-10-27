@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import Decimal from "decimal.js";
 import { Heart } from "lucide-react";
 import { nftDetailQueryOptions } from "@/features/nfts/queries";
 import { useFavorites, useToggleFavorite } from "@/features/favorites/queries";
+import { useAddToCart } from "@/features/cart/queries";
 import { isApiError } from "@/lib/api";
 import { CATEGORY_LABELS } from "@/features/nfts/category-labels";
 import { NftGallery } from "@/features/nfts/components/NftGallery";
@@ -58,6 +59,17 @@ function NftDetailPage() {
   const toggleFavorite = useToggleFavorite();
   const isFavorite = favorites.data?.nftIds.includes(nft.id) ?? false;
 
+  const addToCart = useAddToCart();
+  const navigate = useNavigate();
+
+  function handleBuy() {
+    if (!selectedEdition) return;
+    addToCart.mutate(
+      { nftId: nft.id, editionId: selectedEdition.id, qty: quantity },
+      { onSuccess: () => navigate({ to: "/carrinho" }) },
+    );
+  }
+
   const totalPriceEth = selectedEdition
     ? new Decimal(selectedEdition.priceEth).times(quantity).toFixed()
     : undefined;
@@ -96,18 +108,14 @@ function NftDetailPage() {
             />
 
             <div className="flex gap-3">
-              <Link
-                to="/carrinho"
-                search={{
-                  nftId: nft.id,
-                  editionId: selectedEdition?.id,
-                  qty: quantity,
-                }}
-                disabled={!selectedEdition}
-                className="flex h-10 w-[130px] items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground aria-disabled:pointer-events-none aria-disabled:opacity-40"
+              <button
+                type="button"
+                onClick={handleBuy}
+                disabled={!selectedEdition || addToCart.isPending}
+                className="flex h-10 w-[130px] items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground disabled:pointer-events-none disabled:opacity-40"
               >
                 {totalPriceEth ? `COMPRAR` : "ESGOTADO"}
-              </Link>
+              </button>
 
               <button
                 type="button"

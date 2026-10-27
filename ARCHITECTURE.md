@@ -26,8 +26,11 @@ O Axios converte isso em `ApiError` (`status`, `code`, `message`, `details`); `s
 | `GET /api/favorites` | Lista de IDs favoritados. | — |
 | `POST /api/favorites` | Body `{ nftId }`. Favorita. | `404 NOT_FOUND` se o NFT não existe |
 | `DELETE /api/favorites/:nftId` | Remove dos favoritos. | — |
+| `GET /api/cart` | Itens do carrinho, já com dados do NFT/edição "juntados" (join feito no handler). | — |
+| `POST /api/cart` | Body `{ nftId, editionId, qty }`. Adiciona (ou soma `qty` se já existir a mesma edição no carrinho), limitado ao estoque da edição. | `404 NOT_FOUND`, `400 OUT_OF_STOCK` |
+| `PATCH /api/cart/:nftId/:editionId` | Body `{ qty }`. Define a quantidade; `qty <= 0` remove a linha. | — |
 
-⏳ Sessão, carrinho, cotação, pedidos, perfil e carteiras.
+⏳ Sessão, cotação, pedidos, perfil e carteiras.
 
 **Limitação atual de favoritos**: ainda não existe sessão/usuário (módulo seguinte), então a lista de favoritos é global ao navegador, não por conta. Quando a sessão existir, a query key e o handler precisam isolar por `userId` — hoje isso não acontece, e é um ponto de atenção explícito para não virar exposição de dados entre usuários.
 
@@ -41,12 +44,14 @@ Valores em ETH trafegam como **string decimal** (`"0.25"`) e os cálculos usam `
 - `placeholderData: keepPreviousData` na listagem: a página anterior permanece até a próxima chegar.
 - Retries: no máximo 2, **somente** para falhas transitórias (sem resposta, 408, 429, 5xx). Erros 4xx não repetem.
 - Mutations não repetem sozinhas (evita compra duplicada); a idempotência cobre o reenvio manual.
-- **Atualização otimista** (requisito do desafio): `useToggleFavorite` (`src/features/favorites/queries.ts`) muda o cache antes da resposta chegar (`onMutate`), guarda o estado anterior, desfaz em `onError` se a chamada falhar, e sempre revalida em `onSettled`.
+- **Atualização otimista** (requisito do desafio): `useToggleFavorite` (`src/features/favorites/queries.ts`) e `useUpdateCartItemQty` (`src/features/cart/queries.ts`) mudam o cache antes da resposta chegar (`onMutate`), guardam o estado anterior, desfazem em `onError` se a chamada falhar, e sempre revalidam em `onSettled`.
 - ⏳ Invalidação após mutations e eventos; isolamento por usuário (query keys com `userId` e limpeza do cache no logout).
 
 ## 4. Sessão ⏳
 
-## 5. Carrinho ⏳
+## 5. Carrinho
+
+Guardado no mesmo "banco" fake (`src/mocks/db.ts`, campo `cart`), como uma lista magra de `{ nftId, editionId, qty }` — o handler (`src/mocks/handlers/cart.ts`) junta isso com os dados reais do NFT/edição a cada resposta, parecido com um JOIN de banco de dados de verdade. Mesma limitação dos favoritos: carrinho é global ao navegador até a sessão existir.
 
 ## 6. Tempo real e reconciliação REST × Socket.IO ⏳
 
@@ -65,3 +70,4 @@ Valores em ETH trafegam como **string decimal** (`"0.25"`) e os cálculos usam `
 - **Filtro "Rede"** (Ethereum/Polygon/Solana): renderizado visualmente igual ao Figma, mas sem funcionalidade — o modelo de dado e a API não têm esse campo por NFT.
 - **Detalhe do NFT**: sem estrelas/avaliações de colecionadores e sem a aba "Avaliações" — não existem no modelo de dado nem são pedidos pelo README; sem ícones de compartilhamento (decorativo, sem requisito). Os chips de edição usam os nomes reais do nosso modelo (`Standard`/`Limited`/`Genesis`) em vez do texto do Figma (`1/1`/`1/10`/`1/50`), pelo mesmo motivo.
 - **Favoritos**: coração removido do card do catálogo (só existe no Detalhe) — bate com a tabela de telas do README e com o próprio Figma, que só mostra o coração como estado ilustrativo pontual, não em todo card.
+- **Carrinho**: sem o carrossel "Colecionadores também viram" e sem o footer completo do Figma — são seções decorativas/editoriais sem requisito funcional no README (footer global fica para o final do projeto). O input de "Código promocional" e o botão "Conectar e finalizar" são renderizados iguais ao Figma, mas não funcionais — não há backend de cupom nem de conexão de carteira/sessão neste módulo.

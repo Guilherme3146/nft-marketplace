@@ -6,9 +6,16 @@ import { nftFixtures } from './fixtures/nfts'
  * para sobreviver a refresh. resetDb() volta SEMPRE para o mesmo estado conhecido.
  * Nos próximos módulos entram aqui: users, sessions, favorites, carts, orders, wallets.
  */
+export interface CartRecord {
+  nftId: string
+  editionId: string
+  qty: number
+}
+
 export interface MockDb {
   nfts: Nft[]
   favorites: string[]
+  cart: CartRecord[]
 }
 
 const STORAGE_KEY = 'nft-marketplace:mock-db:v1'
@@ -16,7 +23,7 @@ const STORAGE_KEY = 'nft-marketplace:mock-db:v1'
 const hasStorage = () => typeof localStorage !== 'undefined'
 
 function seed(): MockDb {
-  return { nfts: structuredClone(nftFixtures), favorites: [] }
+  return { nfts: structuredClone(nftFixtures), favorites: [], cart: [] }
 }
 
 function load(): MockDb {
