@@ -79,7 +79,7 @@ test.describe('Carrinho e Checkout', () => {
     await page.getByRole('button', { name: 'COMPRAR' }).click()
     await expect(page).toHaveURL('/carrinho')
 
-    await page.getByRole('link', { name: 'Conectar e finalizar' }).click()
+    await page.getByRole('button', { name: 'Conectar e finalizar' }).click()
     await expect(page).toHaveURL('/pagamento')
     await page.getByRole('button', { name: 'Confirmar compra' }).click()
 
@@ -112,7 +112,7 @@ test.describe('Carrinho e Checkout', () => {
     await page.goto('/')
     await page.locator('ul[aria-busy] > li a').first().click()
     await page.getByRole('button', { name: 'COMPRAR' }).click()
-    await page.getByRole('link', { name: 'Conectar e finalizar' }).click()
+    await page.getByRole('button', { name: 'Conectar e finalizar' }).click()
     await expect(page).toHaveURL('/pagamento')
 
     // Cenário "slow" mantém a primeira requisição pendente por 2,5s, garantindo
@@ -159,7 +159,7 @@ test.describe('Carrinho e Checkout', () => {
     await page.goto('/')
     await page.locator('ul[aria-busy] > li a').first().click()
     await page.getByRole('button', { name: 'COMPRAR' }).click()
-    await page.getByRole('link', { name: 'Conectar e finalizar' }).click()
+    await page.getByRole('button', { name: 'Conectar e finalizar' }).click()
     await expect(page).toHaveURL('/pagamento')
 
     // Cenário "timeout" já embutido no mock: a requisição nunca responde, e o
@@ -236,7 +236,7 @@ test.describe('Carrinho e Checkout', () => {
     await page.goto('/')
     await page.locator('ul[aria-busy] > li a').first().click()
     await page.getByRole('button', { name: 'COMPRAR' }).click()
-    await page.getByRole('link', { name: 'Conectar e finalizar' }).click()
+    await page.getByRole('button', { name: 'Conectar e finalizar' }).click()
     await page.getByRole('button', { name: 'Confirmar compra' }).click()
 
     await expect(page).toHaveURL(/\/confirmacao\//)
@@ -271,7 +271,7 @@ test.describe('Carrinho e Checkout', () => {
     await page.locator('ul[aria-busy] > li a').first().click()
     const nftName = await page.getByRole('heading', { level: 1 }).innerText()
     await page.getByRole('button', { name: 'COMPRAR' }).click()
-    await page.getByRole('link', { name: 'Conectar e finalizar' }).click()
+    await page.getByRole('button', { name: 'Conectar e finalizar' }).click()
 
     await page.evaluate(() => localStorage.setItem('nft-marketplace:scenario', 'payment-declined'))
     await page.getByRole('button', { name: 'Confirmar compra' }).click()
@@ -283,5 +283,53 @@ test.describe('Carrinho e Checkout', () => {
     await page.getByRole('link', { name: 'Tentar novamente' }).click()
     await expect(page).toHaveURL('/pagamento')
     await expect(page.getByText(nftName)).toBeVisible()
+  })
+
+  test('conexão de carteira recusada permite tentar de novo até conectar', async ({ page }) => {
+    await login(page)
+    await page.goto('/')
+    await page.locator('ul[aria-busy] > li a').first().click()
+    await page.getByRole('button', { name: 'COMPRAR' }).click()
+    await expect(page).toHaveURL('/carrinho')
+
+    await page.evaluate(() => localStorage.setItem('nft-marketplace:scenario', 'wallet-rejected'))
+    await page.getByRole('button', { name: 'Conectar e finalizar' }).click()
+    await expect(page.getByRole('heading', { name: 'Conexão recusada' })).toBeVisible()
+    await expect(page).toHaveURL('/carrinho')
+
+    await page.evaluate(() => localStorage.setItem('nft-marketplace:scenario', 'default'))
+    await page.getByRole('button', { name: 'Tentar novamente' }).click()
+    await expect(page).toHaveURL('/pagamento')
+  })
+
+  test('desconectar a carteira no pagamento exige reconectar para continuar', async ({ page }) => {
+    await login(page)
+    await page.goto('/carteiras')
+    await page.getByLabel('Nome de exibição').fill('Ana Collector')
+    await page.getByLabel('Apelido da carteira').fill('Carteira principal')
+    await page.getByLabel('Rede').selectOption('ethereum')
+    await page.getByLabel('Nome do perfil').fill('Ana')
+    await page.getByLabel('Endereço da carteira').fill('0x1234567890123456789012345678901234567890')
+    await page.getByLabel('Tipo de carteira').selectOption('metamask')
+    await page.getByLabel('Código de indicação').fill('AMIGO123')
+    await page.getByLabel('E-mail').fill('ana@kurio.test')
+    await page.getByLabel('Nome ENS').fill('ana')
+    await Promise.all([
+      page.waitForResponse((res) => res.url().includes('/wallets/primary') && res.status() === 200),
+      page.getByRole('button', { name: 'Salvar carteira' }).click(),
+    ])
+
+    await page.goto('/')
+    await page.locator('ul[aria-busy] > li a').first().click()
+    await page.getByRole('button', { name: 'COMPRAR' }).click()
+    await page.getByRole('button', { name: 'Conectar e finalizar' }).click()
+    await expect(page).toHaveURL('/pagamento')
+
+    await page.getByRole('button', { name: 'Desconectar carteira' }).click()
+    await expect(page.getByRole('heading', { name: 'Carteira desconectada' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Confirmar compra' })).not.toBeVisible()
+
+    await page.getByRole('button', { name: 'Conectar carteira' }).click()
+    await expect(page.getByRole('button', { name: 'Confirmar compra' })).toBeVisible()
   })
 })

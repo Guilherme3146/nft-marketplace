@@ -11,6 +11,7 @@ export const SCENARIOS = [
   'server-error',
   'flaky',
   'payment-declined',
+  'wallet-rejected',
 ] as const
 
 export type ScenarioName = (typeof SCENARIOS)[number]

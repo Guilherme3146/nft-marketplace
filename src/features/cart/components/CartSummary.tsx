@@ -1,13 +1,25 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useApplyCoupon, useQuote, useRemoveCoupon } from "@/features/cotacao/queries";
+import { isWalletConnected } from "@/features/wallets/connection";
+import { WalletConnectModal } from "@/features/wallets/components/WalletConnectModal";
 import { isApiError } from "@/lib/api";
 
 export function CartSummary() {
+  const navigate = useNavigate();
   const { data: quote } = useQuote();
   const applyCoupon = useApplyCoupon();
   const removeCoupon = useRemoveCoupon();
   const [code, setCode] = useState("");
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
+
+  function handleConnectAndFinish() {
+    if (isWalletConnected()) {
+      navigate({ to: "/pagamento" });
+      return;
+    }
+    setConnectModalOpen(true);
+  }
 
   function handleApply() {
     if (!code.trim()) return;
@@ -86,16 +98,26 @@ export function CartSummary() {
       </div>
 
       <div className="flex flex-col items-start gap-3">
-        <Link
-          to="/pagamento"
+        <button
+          type="button"
+          onClick={handleConnectAndFinish}
           className="flex h-10 w-full items-center justify-center rounded-sm bg-primary text-sm font-bold text-primary-foreground"
         >
           Conectar e finalizar
-        </Link>
+        </button>
         <Link to="/" className="text-sm text-accent">
           Continuar explorando
         </Link>
       </div>
+
+      <WalletConnectModal
+        open={connectModalOpen}
+        onOpenChange={setConnectModalOpen}
+        onConnected={() => {
+          setConnectModalOpen(false);
+          navigate({ to: "/pagamento" });
+        }}
+      />
     </aside>
   );
 }

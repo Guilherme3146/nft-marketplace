@@ -1,12 +1,25 @@
 import { http, HttpResponse } from "msw";
 import { getDb, persistDb } from "../db";
-import { applyScenario } from "../scenarios";
+import { applyScenario, getScenario } from "../scenarios";
 import { apiPath, errorResponse, resolveUserId } from "../utils";
 import type { Wallet } from "@/features/wallets/types";
 
 const ADDRESS_PATTERN = /^0x[a-fA-F0-9]{40}$/;
 
 export const walletsHandlers = [
+  http.post(apiPath("/wallets/connect"), async () => {
+    // Simula o "popup" de conexão de uma carteira (MetaMask etc.): ~1s de espera e,
+    // sob o cenário "wallet-rejected", uma recusa — sem isso ser uma falha de rede
+    // genérica (a requisição responde normalmente, só que recusando a conexão).
+    await new Promise((resolve) => setTimeout(resolve, 900));
+
+    if (getScenario() === "wallet-rejected") {
+      return errorResponse(403, "WALLET_CONNECTION_REJECTED", "Conexão recusada na carteira.");
+    }
+    return HttpResponse.json({ connected: true });
+  }),
+
+
   http.get(apiPath("/wallets/primary"), async ({ request }) => {
     const failure = await applyScenario(request);
     if (failure) return failure;

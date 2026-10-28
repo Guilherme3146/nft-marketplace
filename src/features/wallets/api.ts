@@ -24,3 +24,7 @@ export async function saveSecondaryWallet(input: SaveWalletInput, signal?: Abort
 export async function deleteSecondaryWallet(signal?: AbortSignal) {
   await api.delete("/wallets/secondary", { signal });
 }
+
+export async function connectWallet(signal?: AbortSignal) {
+  await api.post("/wallets/connect", {}, { signal });
+}

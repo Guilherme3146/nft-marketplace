@@ -11,6 +11,8 @@ import { cartQueryOptions } from "@/features/cart/queries";
 import { profileQueryOptions } from "@/features/profile/queries";
 import { primaryWalletQueryOptions } from "@/features/wallets/queries";
 import { WALLET_TYPES } from "@/features/wallets/types";
+import { isWalletConnected, setWalletConnected } from "@/features/wallets/connection";
+import { WalletConnectModal } from "@/features/wallets/components/WalletConnectModal";
 import { useCreateOrder } from "@/features/orders/queries";
 import { quoteQueryOptions } from "@/features/cotacao/queries";
 import { isApiError } from "@/lib/api";
@@ -57,6 +59,8 @@ function PagamentoPage() {
   const [needsReconfirm, setNeedsReconfirm] = useState(false);
   const [revalidating, setRevalidating] = useState(false);
   const [revalidationError, setRevalidationError] = useState<string | null>(null);
+  const [connected, setConnected] = useState(isWalletConnected);
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
 
   const {
     register,
@@ -109,6 +113,39 @@ function PagamentoPage() {
     );
   }
 
+  if (!connected) {
+    return (
+      <div className="flex flex-col gap-8">
+        <nav aria-label="Breadcrumb" className="text-[15px] font-bold text-foreground">
+          <Link to="/">Início</Link> / Mercado / Pagamento
+        </nav>
+
+        <div className="flex flex-col items-start gap-4 rounded-xl bg-card p-5">
+          <h1 className="text-base font-bold text-foreground">Carteira desconectada</h1>
+          <p className="text-sm text-muted-foreground">
+            Conecte sua carteira novamente para continuar o pagamento.
+          </p>
+          <button
+            type="button"
+            onClick={() => setConnectModalOpen(true)}
+            className="flex h-10 items-center justify-center rounded-sm bg-primary px-4 text-sm font-bold text-primary-foreground"
+          >
+            Conectar carteira
+          </button>
+        </div>
+
+        <WalletConnectModal
+          open={connectModalOpen}
+          onOpenChange={setConnectModalOpen}
+          onConnected={() => {
+            setConnectModalOpen(false);
+            setConnected(true);
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <nav aria-label="Breadcrumb" className="text-[15px] font-bold text-foreground">
@@ -120,24 +157,36 @@ function PagamentoPage() {
           <h1 className="text-base font-bold text-foreground">Perfil do colecionador</h1>
 
           {wallet ? (
-            <dl className="grid grid-cols-1 gap-4 rounded-xl bg-card p-5 text-[15px] sm:grid-cols-2">
-              <div>
-                <dt className="text-secondary">Nome de exibição</dt>
-                <dd className="text-foreground">{wallet.displayName}</dd>
-              </div>
-              <div>
-                <dt className="text-secondary">Rede</dt>
-                <dd className="text-foreground">{wallet.network}</dd>
-              </div>
-              <div>
-                <dt className="text-secondary">Endereço da carteira</dt>
-                <dd className="truncate text-foreground">{wallet.address}</dd>
-              </div>
-              <div>
-                <dt className="text-secondary">E-mail</dt>
-                <dd className="text-foreground">{profile.email}</dd>
-              </div>
-            </dl>
+            <div className="flex flex-col gap-3 rounded-xl bg-card p-5">
+              <dl className="grid grid-cols-1 gap-4 text-[15px] sm:grid-cols-2">
+                <div>
+                  <dt className="text-secondary">Nome de exibição</dt>
+                  <dd className="text-foreground">{wallet.displayName}</dd>
+                </div>
+                <div>
+                  <dt className="text-secondary">Rede</dt>
+                  <dd className="text-foreground">{wallet.network}</dd>
+                </div>
+                <div>
+                  <dt className="text-secondary">Endereço da carteira</dt>
+                  <dd className="truncate text-foreground">{wallet.address}</dd>
+                </div>
+                <div>
+                  <dt className="text-secondary">E-mail</dt>
+                  <dd className="text-foreground">{profile.email}</dd>
+                </div>
+              </dl>
+              <button
+                type="button"
+                onClick={() => {
+                  setWalletConnected(false);
+                  setConnected(false);
+                }}
+                className="w-fit text-sm text-muted-foreground underline hover:text-foreground"
+              >
+                Desconectar carteira
+              </button>
+            </div>
           ) : (
             <div className="flex flex-col gap-2 rounded-xl bg-card p-5 text-sm text-muted-foreground">
               <p>Você ainda não cadastrou uma carteira.</p>

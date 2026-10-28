@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
 import {
+  connectWallet,
   deleteSecondaryWallet,
   fetchPrimaryWallet,
   fetchSecondaryWallet,
@@ -57,5 +58,12 @@ export function useDeleteSecondaryWallet() {
     onSuccess: () => {
       queryClient.setQueryData(walletKeys.secondary, null);
     },
+  });
+}
+
+export function useConnectWallet() {
+  return useMutation({
+    mutationFn: () => connectWallet(),
+    retry: false,
   });
 }
