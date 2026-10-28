@@ -6,7 +6,12 @@ import { z } from "zod";
 import { requireSession } from "@/features/auth/require-session";
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { AccountFormField, EnsField, accountInputClass } from "@/features/account/components/AccountFormField";
-import { primaryWalletQueryOptions, useSavePrimaryWallet } from "@/features/wallets/queries";
+import {
+  primaryWalletQueryOptions,
+  secondaryWalletQueryOptions,
+  useSavePrimaryWallet,
+} from "@/features/wallets/queries";
+import { SecondaryWalletSection } from "@/features/wallets/components/SecondaryWalletSection";
 import { WALLET_NETWORKS, WALLET_TYPES } from "@/features/wallets/types";
 import { isApiError } from "@/lib/api";
 
@@ -44,7 +49,10 @@ export const Route = createFileRoute("/carteiras")({
     await requireSession(context.queryClient);
   },
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(primaryWalletQueryOptions());
+    await Promise.all([
+      context.queryClient.ensureQueryData(primaryWalletQueryOptions()),
+      context.queryClient.ensureQueryData(secondaryWalletQueryOptions()),
+    ]);
   },
   component: CarteirasPage,
 });
@@ -162,15 +170,7 @@ function CarteirasPage() {
           </button>
         </form>
 
-        <div className="flex flex-col gap-3 border-t border-border pt-6">
-          <h2 className="text-[17px] font-bold text-foreground">Carteira secundária</h2>
-          <p className="text-sm text-muted-foreground">
-            Você ainda não adicionou uma carteira secundária.
-          </p>
-          <span className="w-fit cursor-not-allowed text-sm font-medium text-accent opacity-60">
-            Adicionar
-          </span>
-        </div>
+        <SecondaryWalletSection />
       </div>
     </div>
   );

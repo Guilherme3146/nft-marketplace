@@ -34,4 +34,43 @@ export const walletsHandlers = [
 
     return HttpResponse.json(wallet);
   }),
+
+  http.get(apiPath("/wallets/secondary"), async ({ request }) => {
+    const failure = await applyScenario(request);
+    if (failure) return failure;
+
+    return HttpResponse.json(getDb().secondaryWalletsByUser[resolveUserId(request)] ?? null);
+  }),
+
+  http.put(apiPath("/wallets/secondary"), async ({ request }) => {
+    const failure = await applyScenario(request);
+    if (failure) return failure;
+
+    const body = (await request.json()) as Omit<Wallet, "id">;
+    if (!body.address || !ADDRESS_PATTERN.test(body.address)) {
+      return errorResponse(400, "VALIDATION_ERROR", "Endereço de carteira inválido.", {
+        address: ["Use um endereço no formato 0x... (40 caracteres hexadecimais)."],
+      });
+    }
+
+    const userId = resolveUserId(request);
+    const db = getDb();
+    const existing = db.secondaryWalletsByUser[userId];
+    const wallet: Wallet = { ...body, id: existing?.id ?? crypto.randomUUID() };
+    db.secondaryWalletsByUser[userId] = wallet;
+    persistDb();
+
+    return HttpResponse.json(wallet);
+  }),
+
+  http.delete(apiPath("/wallets/secondary"), async ({ request }) => {
+    const failure = await applyScenario(request);
+    if (failure) return failure;
+
+    const userId = resolveUserId(request);
+    getDb().secondaryWalletsByUser[userId] = null;
+    persistDb();
+
+    return HttpResponse.json({ ok: true });
+  }),
 ];

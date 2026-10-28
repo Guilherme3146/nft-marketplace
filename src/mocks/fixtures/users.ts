@@ -6,6 +6,7 @@ export interface UserFixture {
   username: string
   ensName: string
   walletNickname: string
+  avatarUrl?: string
 }
 
 export const userFixtures: UserFixture[] = [

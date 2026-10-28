@@ -12,6 +12,7 @@ function toProfile(user: UserFixture) {
     email: user.email,
     ensName: user.ensName,
     walletNickname: user.walletNickname,
+    avatarUrl: user.avatarUrl,
   };
 }
 
@@ -34,13 +35,14 @@ export const profileHandlers = [
     if (!user) return errorResponse(401, "UNAUTHENTICATED", "Faça login para editar seu perfil.");
 
     const body = (await request.json()) as Partial<
-      Pick<UserFixture, "name" | "username" | "email" | "ensName" | "walletNickname">
+      Pick<UserFixture, "name" | "username" | "email" | "ensName" | "walletNickname" | "avatarUrl">
     >;
     if (body.name) user.name = body.name;
     if (body.username) user.username = body.username;
     if (body.email) user.email = body.email;
     if (body.ensName) user.ensName = body.ensName;
     if (body.walletNickname) user.walletNickname = body.walletNickname;
+    if ("avatarUrl" in body) user.avatarUrl = body.avatarUrl || undefined;
     persistDb();
 
     return HttpResponse.json(toProfile(user));

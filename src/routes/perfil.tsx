@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -7,8 +8,15 @@ import { z } from "zod";
 import { requireSession } from "@/features/auth/require-session";
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { AccountFormField, EnsField, accountInputClass } from "@/features/account/components/AccountFormField";
-import { profileQueryOptions, useChangePassword, useUpdateProfile } from "@/features/profile/queries";
+import {
+  profileQueryOptions,
+  useChangePassword,
+  useUpdateAvatar,
+  useUpdateProfile,
+} from "@/features/profile/queries";
 import { isApiError } from "@/lib/api";
+
+const MAX_AVATAR_BYTES = 300 * 1024;
 
 const profileSchema = z
   .object({
@@ -54,6 +62,27 @@ function PerfilPage() {
   const { data: profile } = useSuspenseQuery(profileQueryOptions());
   const updateProfile = useUpdateProfile();
   const changePassword = useChangePassword();
+  const updateAvatar = useUpdateAvatar();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+
+  function handleAvatarFile(file: File | undefined) {
+    setAvatarError(null);
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setAvatarError("Envie um arquivo de imagem.");
+      return;
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      setAvatarError("A imagem precisa ter no máximo 300 KB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") updateAvatar.mutate(reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
 
   const {
     register,
@@ -124,18 +153,50 @@ function PerfilPage() {
           </AccountFormField>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex size-[50px] items-center justify-center rounded-full border border-border bg-surface-raised">
-            <User className="size-6 text-muted-foreground" />
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-6">
+            {profile.avatarUrl ? (
+              <img
+                src={profile.avatarUrl}
+                alt="Avatar do colecionador"
+                width={50}
+                height={50}
+                className="size-[50px] rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex size-[50px] items-center justify-center rounded-full border border-border bg-surface-raised">
+                <User className="size-6 text-muted-foreground" />
+              </div>
+            )}
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(event) => handleAvatarFile(event.target.files?.[0])}
+            />
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={updateAvatar.isPending}
+              className="h-10 w-[98px] rounded-[3px] bg-primary text-sm font-bold text-primary-foreground disabled:opacity-60"
+            >
+              {updateAvatar.isPending ? "..." : "Alterar"}
+            </button>
+            {profile.avatarUrl ? (
+              <button
+                type="button"
+                onClick={() => updateAvatar.mutate(null)}
+                disabled={updateAvatar.isPending}
+                className="text-sm text-muted-foreground hover:text-foreground disabled:opacity-60"
+              >
+                Remover
+              </button>
+            ) : (
+              <span className="cursor-not-allowed text-sm text-muted-foreground opacity-60">Remover</span>
+            )}
           </div>
-          <button
-            type="button"
-            disabled
-            className="h-10 w-[98px] cursor-not-allowed rounded-[3px] bg-primary text-sm font-bold text-primary-foreground opacity-60"
-          >
-            Alterar
-          </button>
-          <span className="cursor-not-allowed text-sm text-muted-foreground">Remover</span>
+          {avatarError ? <p className="text-xs text-destructive">{avatarError}</p> : null}
         </div>
 
         <div className="flex flex-col gap-6">

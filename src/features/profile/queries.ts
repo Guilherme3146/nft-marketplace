@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
-import { changePassword, fetchProfile, updateProfile } from "./api";
+import { changePassword, fetchProfile, updateAvatar, updateProfile } from "./api";
 import type { ChangePasswordInput, UpdateProfileInput } from "./types";
 import { sessionKeys } from "@/features/auth/queries";
 
@@ -33,5 +33,16 @@ export function useUpdateProfile() {
 export function useChangePassword() {
   return useMutation({
     mutationFn: (input: ChangePasswordInput) => changePassword(input),
+  });
+}
+
+export function useUpdateAvatar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (avatarUrl: string | null) => updateAvatar(avatarUrl),
+    onSuccess: (profile) => {
+      queryClient.setQueryData(profileKeys.all, profile);
+    },
   });
 }

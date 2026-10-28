@@ -14,3 +14,8 @@ export async function updateProfile(input: UpdateProfileInput, signal?: AbortSig
 export async function changePassword(input: ChangePasswordInput, signal?: AbortSignal) {
   await api.patch("/profile/password", input, { signal });
 }
+
+export async function updateAvatar(avatarUrl: string | null, signal?: AbortSignal) {
+  const { data } = await api.patch<Profile>("/profile", { avatarUrl: avatarUrl ?? "" }, { signal });
+  return data;
+}

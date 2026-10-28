@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { expect, test } from '@playwright/test'
 import { login } from './helpers'
 
@@ -55,5 +56,42 @@ test.describe('Conta e sessão', () => {
 
     await page.reload()
     await expect(page.getByLabel('Nome de exibição')).toHaveValue('Ana Atualizada')
+  })
+
+  test('trocar e remover avatar do perfil funciona de ponta a ponta', async ({ page }) => {
+    await login(page)
+    await page.goto('/perfil')
+
+    const avatarFixture = path.join(process.cwd(), 'public', 'nft-art', 'emerald-ape.jpg')
+    await page.locator('input[type="file"]').setInputFiles(avatarFixture)
+
+    await expect(page.getByRole('img', { name: 'Avatar do colecionador' })).toBeVisible()
+    await page.reload()
+    await expect(page.getByRole('img', { name: 'Avatar do colecionador' })).toBeVisible()
+
+    await page.getByRole('button', { name: 'Remover' }).click()
+    await expect(page.getByRole('img', { name: 'Avatar do colecionador' })).not.toBeVisible()
+  })
+
+  test('carteira secundária: adicionar, editar e remover', async ({ page }) => {
+    await login(page)
+    await page.goto('/carteiras')
+
+    await page.getByRole('button', { name: 'Adicionar' }).click()
+    const secondaryForm = page.locator('form').filter({ hasText: 'Apelido da carteira' }).last()
+    await secondaryForm.getByLabel('Apelido da carteira').fill('Carteira de teste')
+    await secondaryForm.getByLabel('Endereço da carteira').fill('0xabcdefabcdefabcdefabcdefabcdefabcdefabcd')
+    await secondaryForm.getByRole('button', { name: 'Salvar' }).click()
+
+    await expect(page.getByText('Carteira de teste')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Editar' }).click()
+    const editForm = page.locator('form').filter({ hasText: 'Apelido da carteira' }).last()
+    await editForm.getByLabel('Apelido da carteira').fill('Carteira renomeada')
+    await editForm.getByRole('button', { name: 'Salvar' }).click()
+    await expect(page.getByText('Carteira renomeada')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Remover' }).click()
+    await expect(page.getByText('Você ainda não adicionou uma carteira secundária.')).toBeVisible()
   })
 })

@@ -5,6 +5,7 @@ export interface Profile {
   email: string;
   ensName: string;
   walletNickname: string;
+  avatarUrl?: string;
 }
 
 export type UpdateProfileInput = Omit<Profile, "id">;

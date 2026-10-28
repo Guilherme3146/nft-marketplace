@@ -18,7 +18,7 @@ export interface MockDb {
   users: UserFixture[]
   sessions: Record<string, string>
   walletsByUser: Record<string, Wallet | null>
-  secondaryWalletsByUser: Record<string, Wallet[]>
+  secondaryWalletsByUser: Record<string, Wallet | null>
   ordersByUser: Record<string, Order[]>
 }
 
