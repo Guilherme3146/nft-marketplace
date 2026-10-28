@@ -25,6 +25,8 @@ export function CatalogHero() {
         alt="Arte digital em destaque"
         width={450}
         height={450}
+        fetchPriority="high"
+        decoding="async"
         className="aspect-square w-full max-w-[360px] rounded-2xl object-cover"
       />
     </section>

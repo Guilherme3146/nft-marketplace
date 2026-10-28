@@ -2,19 +2,20 @@
 
 Marketplace de NFTs em React + TypeScript, com API **simulada** (MSW), tempo real simulado (Socket.IO sobre MSW) e testes E2E (Playwright). Desafio de front-end.
 
-> Estado atual: catálogo, Detalhe do NFT, Carrinho, Conta/Sessão, Perfil/Carteiras, Pagamento/Confirmação de pedido, Tempo real, layout responsivo (mobile-first) e testes E2E (Playwright, 50/50 — desktop e mobile) prontos.
+> Estado atual: catálogo, Detalhe do NFT, Carrinho (com cupom e cotação), Conta/Sessão, Perfil/Carteiras (avatar e carteira secundária incluídos), Pagamento/Confirmação de pedido (pendente/confirmado/recusado), Tempo real, layout responsivo (mobile-first), auditoria Lighthouse e testes E2E (Playwright, 60/60 — desktop e mobile) prontos.
 
 ## Funcionalidades
 
 - **Catálogo** — busca, filtros (categoria, faixa de preço), ordenação, paginação e destaque, tudo refletido na URL.
 - **Detalhe do NFT** — galeria de imagens, seleção de edição, quantidade e favoritar.
-- **Carrinho** — itens, alteração de quantidade, remoção e resumo de valores.
+- **Carrinho** — itens, alteração de quantidade, remoção, cupom promocional (aplicar/remover, código inválido/expirado) e resumo de valores vindo de um recurso de **Cotação** (`GET /api/cotacao`) que valida cupom, descontos e taxas no servidor.
 - **Conta** — cadastro, login, logout e sessão; favoritos e carrinho isolados por usuário.
-- **Perfil e Carteiras** — edição de dados pessoais, troca de senha e cadastro de carteira (rotas protegidas).
-- **Pagamento e Confirmação de pedido** — checkout reaproveitando a carteira já cadastrada, sem atualização otimista. Idempotente contra cliques repetidos e contra reenvio após timeout (chave de idempotência persistida em `sessionStorage`; reuso com dados diferentes retorna conflito em vez de duplicar o pedido).
-- **Tempo real** — curtidas e estoque atualizando sozinhos via Socket.IO, com reconciliação por número de versão.
+- **Perfil e Carteiras** — edição de dados pessoais, avatar (upload/remoção), troca de senha e cadastro de carteira principal **e secundária** (rotas protegidas).
+- **Pagamento e Confirmação de pedido** — checkout reaproveitando a carteira já cadastrada, sem atualização otimista. Revalida preço/desconto/taxas no servidor imediatamente antes de confirmar (mudança exige novo clique). Pedido passa por estados **pendente → confirmado/recusado** (evento `order.updated` em tempo real, com recuperação via REST após refresh/reconexão); numa recusa os itens do carrinho são preservados. Idempotente contra cliques repetidos e contra reenvio após timeout (chave de idempotência persistida em `sessionStorage`; reuso com dados diferentes retorna conflito em vez de duplicar o pedido).
+- **Tempo real** — curtidas/estoque (`nft.updated`) e status de pedido (`order.updated`) via Socket.IO, com reconciliação por número de versão (NFTs) e polling de reconciliação (pedidos).
 - **Responsivo** — layout mobile-first em todas as telas.
-- **Testes E2E** — 50 testes Playwright (projetos desktop e mobile).
+- **Testes E2E** — 60 testes Playwright (projetos desktop e mobile).
+- **Auditoria Lighthouse** — script próprio (`npm run audit:lighthouse`) com 3 medições por viewport e mediana reportada.
 
 ## Stack
 
@@ -29,6 +30,7 @@ Marketplace de NFTs em React + TypeScript, com API **simulada** (MSW), tempo rea
 | API simulada | MSW (`msw` 2.x) |
 | Tempo real | Socket.IO (`socket.io-client`) sobre MSW (`@mswjs/socket.io-binding`) |
 | Testes E2E | Playwright |
+| Auditoria de qualidade | Lighthouse (`lighthouse` + `chrome-launcher`) |
 | Lint | oxlint |
 
 ## Requisitos
@@ -44,6 +46,7 @@ npm run typecheck      # verificação de tipos
 npm run lint           # lint
 npm run build          # typecheck + build de produção (dist/)
 npm run preview        # serve o build em http://localhost:4173 (também com mocks)
+npm run audit:lighthouse  # auditoria de performance/a11y/SEO (ver seção Lighthouse)
 ```
 
 Instruções de teste E2E na seção [Testes](#testes), mais abaixo.
@@ -76,6 +79,7 @@ Escolha por URL (`/?scenario=slow`), pelo console (`window.__mock.setScenario('o
 | `offline` | Falha de conexão |
 | `server-error` | HTTP 500 |
 | `flaky` | A 1ª tentativa de cada requisição falha com 503; a repetição funciona |
+| `payment-declined` | O pedido criado em `/pagamento` resolve como **recusado** em vez de confirmado |
 
 ### Como reproduzir os fluxos de falha
 
@@ -89,6 +93,7 @@ Troque o cenário (URL `?scenario=...` ou `window.__mock.setScenario(...)`) e na
 | Favoritar | `flaky` | A 1ª tentativa falha com 503 e desfaz o estado otimista; repetir o clique funciona |
 | Pagamento → Confirmar compra | `timeout` | Erro "Não foi possível falar com o servidor"; recarregando a página e confirmando de novo **recupera o mesmo pedido** em vez de duplicar (idempotência via `sessionStorage`, coberta em `e2e/cart-checkout.spec.ts`) |
 | Pagamento → Confirmar compra | duplo clique (qualquer cenário) | Botão desabilita no primeiro clique; a chave de idempotência garante um único pedido mesmo se o clique duplo escapar da UI |
+| Pagamento → Confirmar compra | `payment-declined` | Pedido vai para "Pagamento recusado"; o carrinho **não** é esvaziado e "Tentar novamente" volta pro pagamento com os itens intactos |
 
 Para voltar ao estado normal, selecione o cenário `default` (ou recarregue após `window.__mock.setScenario('default')`).
 
@@ -111,13 +116,16 @@ src/
     favorites/         favoritos
     cart/              carrinho
     auth/              cadastro, login, sessão
-    profile/           dados do perfil
-    wallets/           carteira principal
-    orders/            pedidos e checkout
+    profile/           dados do perfil (incluindo avatar)
+    wallets/           carteira principal e secundária
+    cotacao/           cotação do carrinho (subtotal, cupom, desconto, taxas, total)
+    orders/            pedidos, checkout e tempo real de status (order.updated)
     account/           componentes compartilhados de perfil/carteiras
   lib/                 cliente Axios (api.ts), socket (socket.ts), QueryClient (query-client.ts)
   mocks/               MSW: handlers, db, fixtures, cenários de rede
 e2e/                   testes Playwright
+scripts/               auditoria Lighthouse
+lighthouse/reports/    relatórios Lighthouse versionados (HTML + JSON com a mediana)
 ```
 
 Cada pasta em `features/` segue o mesmo padrão: `types.ts` (formato dos dados) → `api.ts` (chamadas Axios) → `queries.ts` (hooks do TanStack Query) → `components/` (telas e peças de UI).
@@ -130,7 +138,24 @@ npm run test:e2e                  # desktop + mobile
 npm run test:e2e:ui               # modo interativo
 ```
 
-50 testes cobrindo catálogo, Detalhe do NFT, carrinho/checkout completo (incluindo duplo clique e reenvio após timeout sem duplicar pedido), conta/sessão e cenários de rede simulados, rodando contra o build de produção em dois tamanhos de viewport (1440px e 390px).
+60 testes cobrindo catálogo, Detalhe do NFT, carrinho/checkout completo (cupom, duplo clique, reenvio após timeout, pedido pendente/confirmado/recusado), conta/sessão (incluindo avatar e carteira secundária) e cenários de rede simulados, rodando contra o build de produção em dois tamanhos de viewport (1440px e 390px).
+
+## Auditoria Lighthouse
+
+```bash
+npm run audit:lighthouse
+```
+
+Builda o app, sobe o preview de produção, roda o Lighthouse **3 vezes** em cada form factor (desktop 1440×900 e mobile 390×844 com throttling de CPU/rede) contra o catálogo, e reporta a **mediana** de cada categoria. Relatórios completos (HTML) ficam versionados em `lighthouse/reports/`; as 3 corridas brutas de cada viewport ficam em `lighthouse/tmp/` (não versionado).
+
+| Categoria | Meta | Desktop | Mobile |
+| --- | --- | --- | --- |
+| Performance | ≥ 90 | 98 ✅ | 66 ⚠️ |
+| Acessibilidade | ≥ 95 | 100 ✅ | 100 ✅ |
+| Boas práticas | ≥ 95 | 100 ✅ | 100 ✅ |
+| SEO | ≥ 90 | 92 ✅ | 92 ✅ |
+
+**Sobre a performance mobile abaixo da meta:** o app é 100% client-side rendered e só monta depois que o MSW (API simulada, parte da stack obrigatória do desafio) termina de registrar o service worker — não existe HTML pré-renderizado nem dado real de servidor para adiantar isso. Sob o throttling pesado do Lighthouse mobile (CPU 4x mais lenta, rede 3G-like), esse boot inicial (service worker + bundle + primeira consulta ao catálogo) domina o LCP. Mitigações já aplicadas: `fetchpriority="high"` + `<link rel="preload">` na imagem do banner, e uma casca estática de carregamento no `index.html` para adiantar o primeiro paint. Resolver isso de vez exigiria SSR/pre-render ou adiar o MSW para fora do caminho crítico — fora do escopo de uma API simulada 100% client-side.
 
 ## Deploy (Vercel)
 

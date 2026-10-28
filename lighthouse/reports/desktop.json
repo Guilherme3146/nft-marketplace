@@ -1,0 +1,36 @@
+{
+  "medians": {
+    "performance": 98,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 92
+  },
+  "targets": {
+    "performance": 90,
+    "accessibility": 95,
+    "best-practices": 95,
+    "seo": 90
+  },
+  "runs": {
+    "performance": [
+      98,
+      98,
+      98
+    ],
+    "accessibility": [
+      100,
+      100,
+      100
+    ],
+    "best-practices": [
+      100,
+      100,
+      100
+    ],
+    "seo": [
+      92,
+      92,
+      92
+    ]
+  }
+}

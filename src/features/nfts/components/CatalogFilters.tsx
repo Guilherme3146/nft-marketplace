@@ -80,6 +80,7 @@ export function CatalogFilters({
             min={PRICE_MIN}
             max={PRICE_MAX}
             step={0.01}
+            thumbLabels={["Preço mínimo", "Preço máximo"]}
             onValueChange={(value) => setRange(value as number[])}
           />
           <p className="text-[15px] text-foreground">

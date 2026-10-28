@@ -51,7 +51,10 @@ export function CatalogToolbar({ sort, onChangeSort }: CatalogToolbarProps) {
       <div className="flex items-center gap-2 text-[15px] text-foreground">
         <span>Ordenar por:</span>
         <Select value={sort} onValueChange={(value) => onChangeSort(value as NftSort)}>
-          <SelectTrigger className="border-none bg-transparent px-0 text-foreground shadow-none">
+          <SelectTrigger
+            aria-label="Ordenar NFTs por"
+            className="border-none bg-transparent px-0 text-foreground shadow-none"
+          >
             <SelectValue>{(value: NftSort) => SORT_LABELS[value]}</SelectValue>
           </SelectTrigger>
           <SelectContent>

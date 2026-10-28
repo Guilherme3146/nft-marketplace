@@ -9,10 +9,19 @@
       content="Descubra, favorite e compre NFTs de coleções selecionadas no NFT Marketplace."
     />
     <meta name="theme-color" content="#ffffff" />
+    <link rel="preload" as="image" href="/nft-art/emerald-ape.jpg" fetchpriority="high" />
     <title>NFT Marketplace</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div
+        role="status"
+        aria-label="Carregando"
+        style="display: flex; min-height: 100vh; align-items: center; justify-content: center; font: 600 14px system-ui, sans-serif; color: #8a8a8a"
+      >
+        Carregando...
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
