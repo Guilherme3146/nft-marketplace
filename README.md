@@ -2,7 +2,7 @@
 
 Marketplace de NFTs em React + TypeScript, com API **simulada** (MSW), tempo real simulado (Socket.IO sobre MSW) e testes E2E (Playwright). Desafio de front-end.
 
-> Estado atual: catálogo, Detalhe do NFT, Carrinho, Conta/Sessão, Perfil/Carteiras, Pagamento/Confirmação de pedido, Tempo real, layout responsivo (mobile-first) e testes E2E (Playwright, 46/46 — desktop e mobile) prontos.
+> Estado atual: catálogo, Detalhe do NFT, Carrinho, Conta/Sessão, Perfil/Carteiras, Pagamento/Confirmação de pedido, Tempo real, layout responsivo (mobile-first) e testes E2E (Playwright, 50/50 — desktop e mobile) prontos.
 
 ## Funcionalidades
 
@@ -11,10 +11,10 @@ Marketplace de NFTs em React + TypeScript, com API **simulada** (MSW), tempo rea
 - **Carrinho** — itens, alteração de quantidade, remoção e resumo de valores.
 - **Conta** — cadastro, login, logout e sessão; favoritos e carrinho isolados por usuário.
 - **Perfil e Carteiras** — edição de dados pessoais, troca de senha e cadastro de carteira (rotas protegidas).
-- **Pagamento e Confirmação de pedido** — checkout reaproveitando a carteira já cadastrada, idempotente e sem atualização otimista.
+- **Pagamento e Confirmação de pedido** — checkout reaproveitando a carteira já cadastrada, sem atualização otimista. Idempotente contra cliques repetidos e contra reenvio após timeout (chave de idempotência persistida em `sessionStorage`; reuso com dados diferentes retorna conflito em vez de duplicar o pedido).
 - **Tempo real** — curtidas e estoque atualizando sozinhos via Socket.IO, com reconciliação por número de versão.
 - **Responsivo** — layout mobile-first em todas as telas.
-- **Testes E2E** — 46 testes Playwright (projetos desktop e mobile).
+- **Testes E2E** — 50 testes Playwright (projetos desktop e mobile).
 
 ## Stack
 
@@ -77,6 +77,21 @@ Escolha por URL (`/?scenario=slow`), pelo console (`window.__mock.setScenario('o
 | `server-error` | HTTP 500 |
 | `flaky` | A 1ª tentativa de cada requisição falha com 503; a repetição funciona |
 
+### Como reproduzir os fluxos de falha
+
+Troque o cenário (URL `?scenario=...` ou `window.__mock.setScenario(...)`) e navegue pela tela correspondente:
+
+| Fluxo | Cenário | O que observar |
+| --- | --- | --- |
+| Catálogo | `offline` ou `server-error` | Mensagem de erro no lugar da grade, sem tela em branco |
+| Catálogo | `empty` | Estado "nenhum NFT encontrado" |
+| Catálogo / Detalhe | `slow` | Skeletons (shimmer) antes dos cards/página carregarem |
+| Favoritar | `flaky` | A 1ª tentativa falha com 503 e desfaz o estado otimista; repetir o clique funciona |
+| Pagamento → Confirmar compra | `timeout` | Erro "Não foi possível falar com o servidor"; recarregando a página e confirmando de novo **recupera o mesmo pedido** em vez de duplicar (idempotência via `sessionStorage`, coberta em `e2e/cart-checkout.spec.ts`) |
+| Pagamento → Confirmar compra | duplo clique (qualquer cenário) | Botão desabilita no primeiro clique; a chave de idempotência garante um único pedido mesmo se o clique duplo escapar da UI |
+
+Para voltar ao estado normal, selecione o cenário `default` (ou recarregue após `window.__mock.setScenario('default')`).
+
 ## Credenciais fictícias
 
 Dois usuários de demonstração (ou cadastre uma conta nova em `/cadastro`):
@@ -115,7 +130,7 @@ npm run test:e2e                  # desktop + mobile
 npm run test:e2e:ui               # modo interativo
 ```
 
-46 testes cobrindo catálogo, Detalhe do NFT, carrinho/checkout completo, conta/sessão e cenários de rede simulados, rodando contra o build de produção em dois tamanhos de viewport (1440px e 390px).
+50 testes cobrindo catálogo, Detalhe do NFT, carrinho/checkout completo (incluindo duplo clique e reenvio após timeout sem duplicar pedido), conta/sessão e cenários de rede simulados, rodando contra o build de produção em dois tamanhos de viewport (1440px e 390px).
 
 ## Deploy (Vercel)
 
