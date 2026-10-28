@@ -2,7 +2,7 @@
 
 Marketplace de NFTs em React + TypeScript, com API **simulada** (MSW), tempo real simulado (Socket.IO sobre MSW) e testes E2E (Playwright). Desafio de front-end.
 
-> Estado atual: catálogo, Detalhe do NFT, Carrinho (com cupom e cotação), Conta/Sessão, Perfil/Carteiras (avatar e carteira secundária incluídos), Pagamento/Confirmação de pedido (pendente/confirmado/recusado), Tempo real, layout responsivo (mobile-first), auditoria Lighthouse e testes E2E (Playwright, 60/60 — desktop e mobile) prontos.
+> Estado atual: catálogo, Detalhe do NFT, Carrinho (com cupom e cotação), Conta/Sessão, Perfil/Carteiras (avatar e carteira secundária incluídos), Pagamento/Confirmação de pedido (conexão de carteira simulada, pendente/confirmado/recusado), Tempo real, layout responsivo (mobile-first), auditoria Lighthouse e testes E2E (Playwright, 64/64 — desktop e mobile) prontos.
 
 ## Funcionalidades
 
@@ -11,10 +11,10 @@ Marketplace de NFTs em React + TypeScript, com API **simulada** (MSW), tempo rea
 - **Carrinho** — itens, alteração de quantidade, remoção, cupom promocional (aplicar/remover, código inválido/expirado) e resumo de valores vindo de um recurso de **Cotação** (`GET /api/cotacao`) que valida cupom, descontos e taxas no servidor.
 - **Conta** — cadastro, login, logout e sessão; favoritos e carrinho isolados por usuário.
 - **Perfil e Carteiras** — edição de dados pessoais, avatar (upload/remoção), troca de senha e cadastro de carteira principal **e secundária** (rotas protegidas).
-- **Pagamento e Confirmação de pedido** — checkout reaproveitando a carteira já cadastrada, sem atualização otimista. Revalida preço/desconto/taxas no servidor imediatamente antes de confirmar (mudança exige novo clique). Pedido passa por estados **pendente → confirmado/recusado** (evento `order.updated` em tempo real, com recuperação via REST após refresh/reconexão); numa recusa os itens do carrinho são preservados. Idempotente contra cliques repetidos e contra reenvio após timeout (chave de idempotência persistida em `sessionStorage`; reuso com dados diferentes retorna conflito em vez de duplicar o pedido).
+- **Pagamento e Confirmação de pedido** — "Conectar e finalizar" simula a conexão de uma carteira (popup de ~900 ms, com recusa simulável e opção de desconectar/reconectar a qualquer momento). Checkout reaproveita a carteira já cadastrada, sem atualização otimista. Revalida preço/desconto/taxas no servidor imediatamente antes de confirmar (mudança exige novo clique). Pedido passa por estados **pendente → confirmado/recusado** (evento `order.updated` em tempo real, com recuperação via REST após refresh/reconexão); numa recusa os itens do carrinho são preservados. Idempotente contra cliques repetidos e contra reenvio após timeout (chave de idempotência persistida em `sessionStorage`; reuso com dados diferentes retorna conflito em vez de duplicar o pedido).
 - **Tempo real** — curtidas/estoque (`nft.updated`) e status de pedido (`order.updated`) via Socket.IO, com reconciliação por número de versão (NFTs) e polling de reconciliação (pedidos).
 - **Responsivo** — layout mobile-first em todas as telas.
-- **Testes E2E** — 60 testes Playwright (projetos desktop e mobile).
+- **Testes E2E** — 64 testes Playwright (projetos desktop e mobile).
 - **Auditoria Lighthouse** — script próprio (`npm run audit:lighthouse`) com 3 medições por viewport e mediana reportada.
 
 ## Stack
@@ -80,6 +80,7 @@ Escolha por URL (`/?scenario=slow`), pelo console (`window.__mock.setScenario('o
 | `server-error` | HTTP 500 |
 | `flaky` | A 1ª tentativa de cada requisição falha com 503; a repetição funciona |
 | `payment-declined` | O pedido criado em `/pagamento` resolve como **recusado** em vez de confirmado |
+| `wallet-rejected` | O popup de conexão de carteira ("Conectar e finalizar") simula uma recusa |
 
 ### Como reproduzir os fluxos de falha
 
@@ -94,6 +95,8 @@ Troque o cenário (URL `?scenario=...` ou `window.__mock.setScenario(...)`) e na
 | Pagamento → Confirmar compra | `timeout` | Erro "Não foi possível falar com o servidor"; recarregando a página e confirmando de novo **recupera o mesmo pedido** em vez de duplicar (idempotência via `sessionStorage`, coberta em `e2e/cart-checkout.spec.ts`) |
 | Pagamento → Confirmar compra | duplo clique (qualquer cenário) | Botão desabilita no primeiro clique; a chave de idempotência garante um único pedido mesmo se o clique duplo escapar da UI |
 | Pagamento → Confirmar compra | `payment-declined` | Pedido vai para "Pagamento recusado"; o carrinho **não** é esvaziado e "Tentar novamente" volta pro pagamento com os itens intactos |
+| Carrinho → "Conectar e finalizar" | `wallet-rejected` | Modal mostra "Conexão recusada", com botão para tentar de novo |
+| Pagamento → "Desconectar carteira" | qualquer | Bloqueia o formulário até reconectar (mesma simulação de conexão) |
 
 Para voltar ao estado normal, selecione o cenário `default` (ou recarregue após `window.__mock.setScenario('default')`).
 
@@ -138,7 +141,7 @@ npm run test:e2e                  # desktop + mobile
 npm run test:e2e:ui               # modo interativo
 ```
 
-60 testes cobrindo catálogo, Detalhe do NFT, carrinho/checkout completo (cupom, duplo clique, reenvio após timeout, pedido pendente/confirmado/recusado), conta/sessão (incluindo avatar e carteira secundária) e cenários de rede simulados, rodando contra o build de produção em dois tamanhos de viewport (1440px e 390px).
+64 testes cobrindo catálogo, Detalhe do NFT, carrinho/checkout completo (cupom, conexão/recusa/desconexão de carteira, duplo clique, reenvio após timeout, pedido pendente/confirmado/recusado), conta/sessão (incluindo avatar e carteira secundária) e cenários de rede simulados, rodando contra o build de produção em dois tamanhos de viewport (1440px e 390px).
 
 ## Auditoria Lighthouse
 
