@@ -26,7 +26,16 @@ export const ordersHandlers = [
     const existingOrders = db.ordersByUser[userId] ?? [];
 
     const duplicate = existingOrders.find((order) => order.id === body.idempotencyKey);
-    if (duplicate) return HttpResponse.json(duplicate);
+    if (duplicate) {
+      const sameWallet = duplicate.walletType === body.walletType;
+      const sameNote = (duplicate.note ?? "") === (body.note ?? "");
+      if (sameWallet && sameNote) return HttpResponse.json(duplicate);
+      return errorResponse(
+        409,
+        "IDEMPOTENCY_CONFLICT",
+        "Esta tentativa de compra já foi usada para um pedido com dados diferentes. Recarregue e confirme novamente.",
+      );
+    }
 
     const items = resolveCartItems(userId);
     if (items.length === 0) {

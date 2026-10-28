@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { clearIdempotencyKey, readOrCreateIdempotencyKey } from "@/features/orders/idempotency";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import Decimal from "decimal.js";
@@ -49,7 +50,7 @@ function PagamentoPage() {
   const { data: wallet } = useSuspenseQuery(primaryWalletQueryOptions());
   const createOrder = useCreateOrder();
 
-  const [idempotencyKey] = useState(() => crypto.randomUUID());
+  const [idempotencyKey] = useState(readOrCreateIdempotencyKey);
 
   const {
     register,
@@ -69,7 +70,15 @@ function PagamentoPage() {
   function onSubmit(values: CheckoutFormValues) {
     createOrder.mutate(
       { idempotencyKey, walletType: values.walletType, note: values.note },
-      { onSuccess: (order) => navigate({ to: "/confirmacao/$orderId", params: { orderId: order.id } }) },
+      {
+        onSuccess: (order) => {
+          clearIdempotencyKey();
+          navigate({ to: "/confirmacao/$orderId", params: { orderId: order.id } });
+        },
+        onError: (error) => {
+          if (isApiError(error) && error.status === 409) clearIdempotencyKey();
+        },
+      },
     );
   }
 
