@@ -1,58 +1,87 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import Decimal from "decimal.js";
-import { NETWORK_FEE_ETH } from "../constants";
-import type { CartLineItem } from "../types";
+import { useApplyCoupon, useQuote, useRemoveCoupon } from "@/features/cotacao/queries";
+import { isApiError } from "@/lib/api";
 
-interface CartSummaryProps {
-  items: CartLineItem[];
-}
+export function CartSummary() {
+  const { data: quote } = useQuote();
+  const applyCoupon = useApplyCoupon();
+  const removeCoupon = useRemoveCoupon();
+  const [code, setCode] = useState("");
 
-export function CartSummary({ items }: CartSummaryProps) {
-  const subtotal = items.reduce(
-    (sum, item) => sum.plus(new Decimal(item.edition.priceEth).times(item.qty)),
-    new Decimal(0),
-  );
-  const total = subtotal.plus(NETWORK_FEE_ETH);
+  function handleApply() {
+    if (!code.trim()) return;
+    applyCoupon.mutate(code.trim(), { onSuccess: () => setCode("") });
+  }
+
+  const hasValidCoupon = quote?.coupon?.valid;
+  const couponError = applyCoupon.isError
+    ? isApiError(applyCoupon.error)
+      ? applyCoupon.error.message
+      : "Não foi possível aplicar o cupom."
+    : null;
 
   return (
     <aside className="flex w-full flex-col gap-6 rounded-xl bg-card p-5 lg:w-[332px] lg:shrink-0">
       <h2 className="text-lg font-bold text-foreground">Resumo da carteira</h2>
 
-      <div className="flex h-10 overflow-hidden rounded-sm border border-primary">
-        <input
-          type="text"
-          placeholder="Digite o código promocional..."
-          disabled
-          className="flex-1 bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground"
-        />
-        <button
-          type="button"
-          disabled
-          className="w-[102px] bg-primary text-sm font-bold text-primary-foreground"
-        >
-          Aplicar
-        </button>
-      </div>
+      {hasValidCoupon ? (
+        <div className="flex h-10 items-center justify-between rounded-sm border border-primary px-3 text-sm text-foreground">
+          <span>
+            Cupom <strong>{quote.coupon?.code}</strong> aplicado
+          </span>
+          <button
+            type="button"
+            onClick={() => removeCoupon.mutate()}
+            disabled={removeCoupon.isPending}
+            className="font-bold text-accent disabled:opacity-60"
+          >
+            Remover
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1">
+          <div className="flex h-10 overflow-hidden rounded-sm border border-primary">
+            <input
+              type="text"
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+              placeholder="Digite o código promocional..."
+              aria-label="Código promocional"
+              className="flex-1 bg-transparent px-3 text-sm text-foreground placeholder:text-muted-foreground"
+            />
+            <button
+              type="button"
+              onClick={handleApply}
+              disabled={applyCoupon.isPending || !code.trim()}
+              className="w-[102px] bg-primary text-sm font-bold text-primary-foreground disabled:opacity-60"
+            >
+              {applyCoupon.isPending ? "..." : "Aplicar"}
+            </button>
+          </div>
+          {couponError ? <p className="text-xs text-destructive">{couponError}</p> : null}
+        </div>
+      )}
 
       <div className="flex flex-col gap-3 text-[15px] text-foreground">
         <div className="flex items-center justify-between">
           <span>Subtotal</span>
-          <span className="text-lg font-bold">{subtotal.toFixed()} ETH</span>
+          <span className="text-lg font-bold">{quote?.subtotalEth ?? "0"} ETH</span>
         </div>
         <div className="flex items-center justify-between">
-          <span>Desconto do lançamento</span>
-          <span className="text-lg font-bold">(-) 00.00</span>
+          <span>Desconto do cupom</span>
+          <span className="text-lg font-bold">(-) {quote?.discountEth ?? "0"} ETH</span>
         </div>
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <span>Taxa de rede</span>
-            <span className="text-lg font-bold">{NETWORK_FEE_ETH} ETH</span>
+            <span className="text-lg font-bold">{quote?.networkFeeEth ?? "0"} ETH</span>
           </div>
           <span className="text-xs text-accent">Taxa estimada</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="font-bold">Total</span>
-          <span className="text-lg font-bold text-accent">{total.toFixed()} ETH</span>
+          <span className="text-lg font-bold text-accent">{quote?.totalEth ?? "0"} ETH</span>
         </div>
       </div>
 

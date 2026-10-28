@@ -11,7 +11,10 @@ test.describe('Carrinho e Checkout', () => {
     await page.getByRole('button', { name: 'COMPRAR' }).click()
 
     await expect(page).toHaveURL('/carrinho')
-    await expect(page.getByText(nftName)).toBeVisible()
+    // Escopado ao item do carrinho (não à página toda): o nome do NFT também aparece
+    // dentro do texto da aba "Detalhes" na página de Detalhe, e por um instante durante
+    // a transição de rota as duas páginas podem coexistir no DOM.
+    await expect(page.getByRole('listitem').getByText(nftName, { exact: true })).toBeVisible()
   })
 
   test('alterar quantidade atualiza o total da linha', async ({ page }) => {
@@ -124,7 +127,7 @@ test.describe('Carrinho e Checkout', () => {
     await expect(page).toHaveURL(/\/confirmacao\//, { timeout: 15_000 })
 
     const totalOrders = await page.evaluate(() => {
-      const raw = localStorage.getItem('nft-marketplace:mock-db:v6')
+      const raw = localStorage.getItem('nft-marketplace:mock-db:v7')
       if (!raw) return 0
       const db = JSON.parse(raw) as { ordersByUser: Record<string, unknown[]> }
       return Object.values(db.ordersByUser).reduce((sum, orders) => sum + orders.length, 0)
@@ -133,6 +136,10 @@ test.describe('Carrinho e Checkout', () => {
   })
 
   test('reenvio após timeout recupera o mesmo pedido sem duplicar', async ({ page }) => {
+    // A revalidação de preço antes de confirmar reusa a política de retry padrão do
+    // app (status 0 / timeout é tentado até 2x antes de desistir), então uma falha de
+    // rede real leva bem mais que 10s pra aparecer na tela — ver src/lib/query-client.ts.
+    test.setTimeout(90_000)
     await login(page)
     await page.goto('/carteiras')
     await page.getByLabel('Nome de exibição').fill('Ana Collector')
@@ -159,7 +166,7 @@ test.describe('Carrinho e Checkout', () => {
     // axios (timeout de 10s) desiste sozinho — reproduzindo um timeout real.
     await page.evaluate(() => localStorage.setItem('nft-marketplace:scenario', 'timeout'))
     await page.getByRole('button', { name: 'Confirmar compra' }).click()
-    await expect(page.getByText(/falar com o servidor/i)).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText(/falar com o servidor/i)).toBeVisible({ timeout: 45_000 })
 
     // Colecionador recarrega a página após o timeout e tenta de novo.
     await page.evaluate(() => localStorage.setItem('nft-marketplace:scenario', 'default'))
@@ -169,11 +176,43 @@ test.describe('Carrinho e Checkout', () => {
     await expect(page).toHaveURL(/\/confirmacao\//)
 
     const totalOrders = await page.evaluate(() => {
-      const raw = localStorage.getItem('nft-marketplace:mock-db:v6')
+      const raw = localStorage.getItem('nft-marketplace:mock-db:v7')
       if (!raw) return 0
       const db = JSON.parse(raw) as { ordersByUser: Record<string, unknown[]> }
       return Object.values(db.ordersByUser).reduce((sum, orders) => sum + orders.length, 0)
     })
     expect(totalOrders).toBe(1)
+  })
+
+  test('cupom promocional: aplica desconto válido, rejeita inválido e permite remover', async ({ page }) => {
+    await login(page)
+    await page.goto('/')
+    await page.locator('ul[aria-busy] > li a').first().click()
+    await page.getByRole('button', { name: 'COMPRAR' }).click()
+    await expect(page).toHaveURL('/carrinho')
+
+    const couponInput = page.getByLabel('Código promocional')
+    const applyButton = page.getByRole('button', { name: 'Aplicar' })
+
+    // Código inválido: mostra erro e não altera o total.
+    await couponInput.fill('NAOEXISTE')
+    await applyButton.click()
+    await expect(page.getByText(/código promocional inválido/i)).toBeVisible()
+    await expect(page.getByText('(-) 0 ETH')).toBeVisible()
+
+    // Código expirado: mesma rejeição, com motivo específico.
+    await couponInput.fill('EXPIRADO10')
+    await applyButton.click()
+    await expect(page.getByText(/expirado/i)).toBeVisible()
+
+    // Código válido: desconto aparece no resumo e o cupom pode ser removido.
+    await couponInput.fill('LANCA10')
+    await applyButton.click()
+    await expect(page.getByText('LANCA10')).toBeVisible()
+    await expect(page.getByText('(-) 0 ETH')).not.toBeVisible()
+
+    await page.getByRole('button', { name: 'Remover', exact: true }).click()
+    await expect(couponInput).toBeVisible()
+    await expect(page.getByText('(-) 0 ETH')).toBeVisible()
   })
 })

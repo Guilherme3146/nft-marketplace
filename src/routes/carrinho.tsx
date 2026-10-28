@@ -1,11 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCart } from "@/features/cart/queries";
+import { quoteQueryOptions } from "@/features/cotacao/queries";
 import { CartItemRow } from "@/features/cart/components/CartItemRow";
 import { CartSummary } from "@/features/cart/components/CartSummary";
 
 export const Route = createFileRoute("/carrinho")({
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(quoteQueryOptions());
+  },
+  pendingMs: 0,
+  pendingComponent: CartSkeleton,
   component: CartPage,
 });
+
+function CartSkeleton() {
+  return (
+    <p role="status" className="text-muted-foreground">
+      Carregando carrinho...
+    </p>
+  );
+}
 
 function CartPage() {
   const cart = useCart();
@@ -45,7 +59,7 @@ function CartPage() {
             </ul>
           </div>
 
-          <CartSummary items={items} />
+          <CartSummary />
         </div>
       )}
     </div>

@@ -13,6 +13,8 @@ export interface Order {
   id: string;
   items: OrderItem[];
   subtotalEth: Eth;
+  discountEth: Eth;
+  couponCode?: string;
   networkFeeEth: Eth;
   totalEth: Eth;
   walletType: WalletType;

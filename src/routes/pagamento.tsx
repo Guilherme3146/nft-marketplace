@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { clearIdempotencyKey, readOrCreateIdempotencyKey } from "@/features/orders/idempotency";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import Decimal from "decimal.js";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { requireSession } from "@/features/auth/require-session";
 import { cartQueryOptions } from "@/features/cart/queries";
-import { NETWORK_FEE_ETH } from "@/features/cart/constants";
 import { profileQueryOptions } from "@/features/profile/queries";
 import { primaryWalletQueryOptions } from "@/features/wallets/queries";
 import { WALLET_TYPES } from "@/features/wallets/types";
 import { useCreateOrder } from "@/features/orders/queries";
+import { quoteQueryOptions } from "@/features/cotacao/queries";
 import { isApiError } from "@/lib/api";
 
 const WALLET_TYPE_LABELS: Record<(typeof WALLET_TYPES)[number], string> = {
@@ -37,6 +37,7 @@ export const Route = createFileRoute("/pagamento")({
       context.queryClient.ensureQueryData(cartQueryOptions()),
       context.queryClient.ensureQueryData(profileQueryOptions()),
       context.queryClient.ensureQueryData(primaryWalletQueryOptions()),
+      context.queryClient.ensureQueryData(quoteQueryOptions()),
     ]);
     if (cart.items.length === 0) throw redirect({ to: "/carrinho" });
   },
@@ -45,12 +46,17 @@ export const Route = createFileRoute("/pagamento")({
 
 function PagamentoPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: cart } = useSuspenseQuery(cartQueryOptions());
   const { data: profile } = useSuspenseQuery(profileQueryOptions());
   const { data: wallet } = useSuspenseQuery(primaryWalletQueryOptions());
+  const { data: quote } = useSuspenseQuery(quoteQueryOptions());
   const createOrder = useCreateOrder();
 
   const [idempotencyKey] = useState(readOrCreateIdempotencyKey);
+  const [needsReconfirm, setNeedsReconfirm] = useState(false);
+  const [revalidating, setRevalidating] = useState(false);
+  const [revalidationError, setRevalidationError] = useState<string | null>(null);
 
   const {
     register,
@@ -61,13 +67,34 @@ function PagamentoPage() {
     defaultValues: { walletType: wallet?.walletType ?? "metamask", note: "" },
   });
 
-  const subtotal = cart.items.reduce(
-    (sum, item) => sum.plus(new Decimal(item.edition.priceEth).times(item.qty)),
-    new Decimal(0),
-  );
-  const total = subtotal.plus(NETWORK_FEE_ETH);
+  async function onSubmit(values: CheckoutFormValues) {
+    // Revalida preço, disponibilidade e cupom direto no servidor antes de confirmar:
+    // se algo mudou desde que a tela carregou (ex.: estoque/curtidas em tempo real,
+    // cupom expirado), atualiza os valores exibidos e exige um novo clique em vez
+    // de confirmar a compra com números que o usuário não viu.
+    setRevalidating(true);
+    setRevalidationError(null);
 
-  function onSubmit(values: CheckoutFormValues) {
+    try {
+      const before = queryClient.getQueryData(quoteQueryOptions().queryKey);
+      const fresh = await queryClient.fetchQuery({ ...quoteQueryOptions(), staleTime: 0 });
+
+      const changed =
+        !before || before.totalEth !== fresh.totalEth || before.subtotalEth !== fresh.subtotalEth;
+      if (changed) {
+        setNeedsReconfirm(true);
+        return;
+      }
+    } catch (error) {
+      setRevalidationError(
+        isApiError(error) ? error.message : "Não foi possível confirmar a compra.",
+      );
+      return;
+    } finally {
+      setRevalidating(false);
+    }
+
+    setNeedsReconfirm(false);
     createOrder.mutate(
       { idempotencyKey, walletType: values.walletType, note: values.note },
       {
@@ -164,18 +191,24 @@ function PagamentoPage() {
           <div className="flex flex-col gap-3 text-[15px] text-foreground">
             <div className="flex items-center justify-between">
               <span>Subtotal</span>
-              <span className="text-lg font-bold">{subtotal.toFixed()} ETH</span>
+              <span className="text-lg font-bold">{quote.subtotalEth} ETH</span>
             </div>
+            {quote.coupon?.valid ? (
+              <div className="flex items-center justify-between">
+                <span>Desconto ({quote.coupon.code})</span>
+                <span className="text-lg font-bold">(-) {quote.discountEth} ETH</span>
+              </div>
+            ) : null}
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <span>Taxa de rede</span>
-                <span className="text-lg font-bold">{NETWORK_FEE_ETH} ETH</span>
+                <span className="text-lg font-bold">{quote.networkFeeEth} ETH</span>
               </div>
               <span className="text-xs text-accent">Taxa estimada</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="font-bold">Total</span>
-              <span className="text-lg font-bold text-accent">{total.toFixed()} ETH</span>
+              <span className="text-lg font-bold text-accent">{quote.totalEth} ETH</span>
             </div>
           </div>
 
@@ -197,6 +230,15 @@ function PagamentoPage() {
             ) : null}
           </div>
 
+          {needsReconfirm ? (
+            <p role="alert" className="text-sm text-accent">
+              Os valores mudaram desde que você abriu esta tela. Revise o resumo acima e confirme de
+              novo para continuar.
+            </p>
+          ) : null}
+
+          {revalidationError ? <p className="text-sm text-destructive">{revalidationError}</p> : null}
+
           {createOrder.isError ? (
             <p className="text-sm text-destructive">
               {isApiError(createOrder.error) ? createOrder.error.message : "Não foi possível confirmar a compra."}
@@ -205,10 +247,16 @@ function PagamentoPage() {
 
           <button
             type="submit"
-            disabled={createOrder.isPending || !wallet}
+            disabled={createOrder.isPending || revalidating || !wallet}
             className="h-[45px] rounded-lg bg-primary text-[15px] font-bold text-primary-foreground disabled:opacity-60"
           >
-            {createOrder.isPending ? "Confirmando..." : "Confirmar compra"}
+            {createOrder.isPending
+              ? "Confirmando..."
+              : revalidating
+                ? "Verificando valores..."
+                : needsReconfirm
+                  ? "Confirmar com os novos valores"
+                  : "Confirmar compra"}
           </button>
         </div>
       </form>

@@ -1,10 +1,9 @@
 import { http, HttpResponse } from "msw";
-import Decimal from "decimal.js";
 import { getDb, persistDb } from "../db";
 import { applyScenario } from "../scenarios";
 import { apiPath, errorResponse, resolveUserId } from "../utils";
 import { resolveCartItems } from "./cart";
-import { NETWORK_FEE_ETH } from "@/features/cart/constants";
+import { computeQuote } from "./quote";
 import type { Order } from "@/features/orders/types";
 
 export const ordersHandlers = [
@@ -42,11 +41,9 @@ export const ordersHandlers = [
       return errorResponse(400, "EMPTY_CART", "Seu carrinho está vazio.");
     }
 
-    const subtotal = items.reduce(
-      (sum, item) => sum.plus(new Decimal(item.edition.priceEth).times(item.qty)),
-      new Decimal(0),
-    );
-    const total = subtotal.plus(NETWORK_FEE_ETH);
+    // Nunca confia no total que o cliente mostrou: recalcula no servidor,
+    // incluindo o cupom aplicado (também guardado no servidor, não no corpo da requisição).
+    const quote = computeQuote(userId);
 
     const order: Order = {
       id: body.idempotencyKey,
@@ -57,9 +54,11 @@ export const ordersHandlers = [
         nft,
         edition: { id: edition.id, label: edition.label, priceEth: edition.priceEth },
       })),
-      subtotalEth: subtotal.toFixed(),
-      networkFeeEth: NETWORK_FEE_ETH,
-      totalEth: total.toFixed(),
+      subtotalEth: quote.subtotalEth,
+      discountEth: quote.discountEth,
+      couponCode: quote.coupon?.valid ? quote.coupon.code : undefined,
+      networkFeeEth: quote.networkFeeEth,
+      totalEth: quote.totalEth,
       walletType: body.walletType,
       note: body.note || undefined,
       createdAt: new Date().toISOString(),
@@ -67,6 +66,7 @@ export const ordersHandlers = [
 
     db.ordersByUser[userId] = [...existingOrders, order];
     db.cartByUser[userId] = [];
+    delete db.couponByUser[userId];
     persistDb();
 
     return HttpResponse.json(order);

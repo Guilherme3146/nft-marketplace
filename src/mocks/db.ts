@@ -14,15 +14,17 @@ export interface MockDb {
   nfts: Nft[]
   favoritesByUser: Record<string, string[]>
   cartByUser: Record<string, CartRecord[]>
+  couponByUser: Record<string, string | undefined>
   users: UserFixture[]
   sessions: Record<string, string>
   walletsByUser: Record<string, Wallet | null>
+  secondaryWalletsByUser: Record<string, Wallet[]>
   ordersByUser: Record<string, Order[]>
 }
 
 export const GUEST_USER_ID = 'guest'
 
-const STORAGE_KEY = 'nft-marketplace:mock-db:v6'
+const STORAGE_KEY = 'nft-marketplace:mock-db:v7'
 
 const hasStorage = () => typeof localStorage !== 'undefined'
 
@@ -31,9 +33,11 @@ function seed(): MockDb {
     nfts: structuredClone(nftFixtures),
     favoritesByUser: {},
     cartByUser: {},
+    couponByUser: {},
     users: structuredClone(userFixtures),
     sessions: {},
     walletsByUser: {},
+    secondaryWalletsByUser: {},
     ordersByUser: {},
   }
 }
