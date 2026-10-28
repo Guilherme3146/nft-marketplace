@@ -6,10 +6,19 @@ const UPDATE_INTERVAL_MS = 4000;
 
 const realtimeChannel = ws.link("*");
 
+type ActiveConnection = ReturnType<typeof toSocketIo>;
+const activeConnections = new Set<ActiveConnection>();
+
+export function broadcastOrderUpdate(payload: { id: string; status: string }): void {
+  for (const io of activeConnections) {
+    io.client.emit("order.updated", payload);
+  }
+}
+
 export const realtimeHandlers = [
   realtimeChannel.addEventListener("connection", (connection) => {
-    console.log("[realtime] CONEXAO RECEBIDA", connection.client.url);
     const io = toSocketIo(connection);
+    activeConnections.add(io);
 
     const interval = setInterval(() => {
       const db = getDb();
@@ -30,7 +39,7 @@ export const realtimeHandlers = [
       nft.version += 1;
       persistDb();
 
-      io.client.emit("nft:update", {
+      io.client.emit("nft.updated", {
         id: nft.id,
         likes: nft.likes,
         available: nft.available,
@@ -39,6 +48,9 @@ export const realtimeHandlers = [
       });
     }, UPDATE_INTERVAL_MS);
 
-    connection.client.addEventListener("close", () => clearInterval(interval));
+    connection.client.addEventListener("close", () => {
+      clearInterval(interval);
+      activeConnections.delete(io);
+    });
   }),
 ];

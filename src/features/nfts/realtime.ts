@@ -47,12 +47,12 @@ export function useRealtimeNftUpdates() {
     void getSocket().then((socket) => {
       if (cancelled) return;
       activeSocket = socket;
-      socket.on("nft:update", handleUpdate);
+      socket.on("nft.updated", handleUpdate);
     });
 
     return () => {
       cancelled = true;
-      activeSocket?.off("nft:update", handleUpdate);
+      activeSocket?.off("nft.updated", handleUpdate);
     };
   }, [queryClient]);
 }

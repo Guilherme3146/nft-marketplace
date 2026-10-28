@@ -2,6 +2,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { requireSession } from "@/features/auth/require-session";
 import { orderQueryOptions } from "@/features/orders/queries";
+import { useRealtimeOrderStatus } from "@/features/orders/realtime";
 import { isApiError } from "@/lib/api";
 
 const WALLET_TYPE_LABELS = {
@@ -36,12 +37,48 @@ export const Route = createFileRoute("/confirmacao/$orderId")({
 function ConfirmacaoPage() {
   const { orderId } = Route.useParams();
   const { data: order } = useSuspenseQuery(orderQueryOptions(orderId));
+  useRealtimeOrderStatus(orderId);
 
   const formattedDate = new Date(order.createdAt).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
+
+  if (order.status === "pending") {
+    return (
+      <div className="mx-auto flex w-full max-w-[578px] flex-col items-center gap-4 rounded-lg bg-card px-6 py-16 text-center">
+        <div
+          role="status"
+          aria-label="Confirmando pedido"
+          className="size-10 animate-spin rounded-full border-4 border-border border-t-accent"
+        />
+        <h1 className="text-xl font-bold text-foreground">Confirmando seu pedido...</h1>
+        <p className="text-sm text-muted-foreground">
+          Estamos validando sua transação na rede. Isso leva só alguns instantes — não feche
+          nem recarregue esta página.
+        </p>
+      </div>
+    );
+  }
+
+  if (order.status === "declined") {
+    return (
+      <div className="mx-auto flex w-full max-w-[578px] flex-col items-center gap-4 rounded-lg bg-card px-6 py-16 text-center">
+        <h1 className="text-xl font-bold text-destructive">Pagamento recusado</h1>
+        <p className="text-sm text-muted-foreground">
+          Não foi possível confirmar o pagamento desta compra. Seus itens continuam disponíveis
+          para tentar novamente.
+        </p>
+        <Link
+          to="/pagamento"
+          className="flex h-10 items-center justify-center rounded-sm bg-primary px-6 text-sm font-bold text-primary-foreground"
+        >
+          Tentar novamente
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-[578px] flex-col overflow-hidden rounded-lg bg-card">

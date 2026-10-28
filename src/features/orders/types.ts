@@ -9,8 +9,11 @@ export interface OrderItem {
   edition: { id: string; label: string; priceEth: Eth };
 }
 
+export type OrderStatus = "pending" | "confirmed" | "declined";
+
 export interface Order {
   id: string;
+  status: OrderStatus;
   items: OrderItem[];
   subtotalEth: Eth;
   discountEth: Eth;

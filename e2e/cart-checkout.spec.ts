@@ -127,7 +127,7 @@ test.describe('Carrinho e Checkout', () => {
     await expect(page).toHaveURL(/\/confirmacao\//, { timeout: 15_000 })
 
     const totalOrders = await page.evaluate(() => {
-      const raw = localStorage.getItem('nft-marketplace:mock-db:v7')
+      const raw = localStorage.getItem('nft-marketplace:mock-db:v8')
       if (!raw) return 0
       const db = JSON.parse(raw) as { ordersByUser: Record<string, unknown[]> }
       return Object.values(db.ordersByUser).reduce((sum, orders) => sum + orders.length, 0)
@@ -176,7 +176,7 @@ test.describe('Carrinho e Checkout', () => {
     await expect(page).toHaveURL(/\/confirmacao\//)
 
     const totalOrders = await page.evaluate(() => {
-      const raw = localStorage.getItem('nft-marketplace:mock-db:v7')
+      const raw = localStorage.getItem('nft-marketplace:mock-db:v8')
       if (!raw) return 0
       const db = JSON.parse(raw) as { ordersByUser: Record<string, unknown[]> }
       return Object.values(db.ordersByUser).reduce((sum, orders) => sum + orders.length, 0)
@@ -214,5 +214,74 @@ test.describe('Carrinho e Checkout', () => {
     await page.getByRole('button', { name: 'Remover', exact: true }).click()
     await expect(couponInput).toBeVisible()
     await expect(page.getByText('(-) 0 ETH')).toBeVisible()
+  })
+
+  test('pedido fica pendente, depois confirmado (estado + evento order.updated)', async ({ page }) => {
+    await login(page)
+    await page.goto('/carteiras')
+    await page.getByLabel('Nome de exibição').fill('Ana Collector')
+    await page.getByLabel('Apelido da carteira').fill('Carteira principal')
+    await page.getByLabel('Rede').selectOption('ethereum')
+    await page.getByLabel('Nome do perfil').fill('Ana')
+    await page.getByLabel('Endereço da carteira').fill('0x1234567890123456789012345678901234567890')
+    await page.getByLabel('Tipo de carteira').selectOption('metamask')
+    await page.getByLabel('Código de indicação').fill('AMIGO123')
+    await page.getByLabel('E-mail').fill('ana@kurio.test')
+    await page.getByLabel('Nome ENS').fill('ana')
+    await Promise.all([
+      page.waitForResponse((res) => res.url().includes('/wallets/primary') && res.status() === 200),
+      page.getByRole('button', { name: 'Salvar carteira' }).click(),
+    ])
+
+    await page.goto('/')
+    await page.locator('ul[aria-busy] > li a').first().click()
+    await page.getByRole('button', { name: 'COMPRAR' }).click()
+    await page.getByRole('link', { name: 'Conectar e finalizar' }).click()
+    await page.getByRole('button', { name: 'Confirmar compra' }).click()
+
+    await expect(page).toHaveURL(/\/confirmacao\//)
+    await expect(page.getByText('Confirmando seu pedido...')).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'Seus NFTs agora estão na sua carteira' }),
+    ).toBeVisible()
+
+    // Confirmado: agora sim o carrinho foi esvaziado.
+    await page.goto('/carrinho')
+    await expect(page.getByRole('heading', { name: 'Seu carrinho está vazio' })).toBeVisible()
+  })
+
+  test('pedido recusado preserva os itens no carrinho para nova tentativa', async ({ page }) => {
+    await login(page)
+    await page.goto('/carteiras')
+    await page.getByLabel('Nome de exibição').fill('Ana Collector')
+    await page.getByLabel('Apelido da carteira').fill('Carteira principal')
+    await page.getByLabel('Rede').selectOption('ethereum')
+    await page.getByLabel('Nome do perfil').fill('Ana')
+    await page.getByLabel('Endereço da carteira').fill('0x1234567890123456789012345678901234567890')
+    await page.getByLabel('Tipo de carteira').selectOption('metamask')
+    await page.getByLabel('Código de indicação').fill('AMIGO123')
+    await page.getByLabel('E-mail').fill('ana@kurio.test')
+    await page.getByLabel('Nome ENS').fill('ana')
+    await Promise.all([
+      page.waitForResponse((res) => res.url().includes('/wallets/primary') && res.status() === 200),
+      page.getByRole('button', { name: 'Salvar carteira' }).click(),
+    ])
+
+    await page.goto('/')
+    await page.locator('ul[aria-busy] > li a').first().click()
+    const nftName = await page.getByRole('heading', { level: 1 }).innerText()
+    await page.getByRole('button', { name: 'COMPRAR' }).click()
+    await page.getByRole('link', { name: 'Conectar e finalizar' }).click()
+
+    await page.evaluate(() => localStorage.setItem('nft-marketplace:scenario', 'payment-declined'))
+    await page.getByRole('button', { name: 'Confirmar compra' }).click()
+
+    await expect(page).toHaveURL(/\/confirmacao\//)
+    await expect(page.getByRole('heading', { name: 'Pagamento recusado' })).toBeVisible()
+
+    await page.evaluate(() => localStorage.setItem('nft-marketplace:scenario', 'default'))
+    await page.getByRole('link', { name: 'Tentar novamente' }).click()
+    await expect(page).toHaveURL('/pagamento')
+    await expect(page.getByText(nftName)).toBeVisible()
   })
 })
